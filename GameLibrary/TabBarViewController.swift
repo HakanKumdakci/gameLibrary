@@ -37,12 +37,12 @@ class TabBarViewController: UITabBarController {
         let imgFavorite = Helper.shared.resizeImage(image: UIImage(named: "star")!.withRenderingMode(.alwaysOriginal), targetSize: CGSize(width: 42, height: 32))
         var icon2: UITabBarItem!
         if #available(iOS 13.0, *) {
-            icon2 = UITabBarItem(title: "Games", image: imgFavorite, selectedImage: imgFavorite.withTintColor(.gray, renderingMode: .alwaysOriginal))
+            icon2 = UITabBarItem(title: "Favorites", image: imgFavorite, selectedImage: imgFavorite.withTintColor(.gray, renderingMode: .alwaysOriginal))
         } else {
-            icon2 = UITabBarItem(title: "Games", image: imgFavorite, selectedImage: imgFavorite)
+            icon2 = UITabBarItem(title: "Favorites", image: imgFavorite, selectedImage: imgFavorite)
         }
         favorite.tabBarItem = icon2
-        item2.title = "Games"
+        item2.title = "Favorites"
         
         
         self.viewControllers = [games, favorite]

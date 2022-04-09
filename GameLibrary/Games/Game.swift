@@ -29,10 +29,12 @@ struct Genre: Codable{
 
 
 struct GameDetail: Codable{
+    var id: Int
     var name: String
     var description: String
+    var metacritic: Int?
     var background_image: String
-    
     var reddit_url: String?
     var website: String?
+    var genres: [Genre]
 }

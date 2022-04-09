@@ -37,7 +37,7 @@ class GameDetailViewController: UIViewController {
         label.textColor = .black
         label.numberOfLines = 0
         label.textAlignment = .left
-        label.text = "Game Description"
+        label.text = ""
         return label
     }()
     
@@ -55,7 +55,7 @@ class GameDetailViewController: UIViewController {
     
     lazy var redditButton: UIButton = {
         var btn = UIButton(type: .system)
-        btn.setTitle("Visit reddit", for: .normal)
+        btn.setTitle("", for: .normal)
         btn.titleLabel?.textAlignment = .left
         btn.backgroundColor = .clear
         btn.tintColor = .black
@@ -67,7 +67,7 @@ class GameDetailViewController: UIViewController {
     
     lazy var websitebutton: UIButton = {
         var btn = UIButton(type: .system)
-        btn.setTitle("Visit website", for: .normal)
+        btn.setTitle("", for: .normal)
         btn.titleLabel?.textAlignment = .left
         btn.backgroundColor = .clear
         btn.tintColor = .black
@@ -82,14 +82,12 @@ class GameDetailViewController: UIViewController {
     }
     
     
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .white
         viewModel.delegate = self
         
-        self.navigationController?.navigationBar.prefersLargeTitles = false
-        self.navigationController!.navigationItem.largeTitleDisplayMode = .never
         
         if let ss = UserDefaults.standard.value(forKey: "fav") as? [String]{
             if ss.contains(where: { $0 == "\(viewModel.game.id)"} ) {
@@ -101,6 +99,9 @@ class GameDetailViewController: UIViewController {
             UserDefaults.standard.set([], forKey: "fav")
             self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(title: "Favorite", style: .done, target: self, action: #selector(self.toggleFavorite))
         }
+        self.navigationItem.rightBarButtonItem?.isEnabled = false
+        self.websitebutton.isEnabled = false
+        self.redditButton.isEnabled = false
         
         view.addSubview(imageOfGame)
         imageOfGame.addSubview(nameOfGame)
@@ -157,12 +158,11 @@ class GameDetailViewController: UIViewController {
         
         let vc = SFSafariViewController(url: url)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-          self.present(vc, animated: true, completion: nil)
+            self.present(vc, animated: true, completion: nil)
         }
     }
     
     @objc func toggleFavorite(){
-        
         if var ss = UserDefaults.standard.value(forKey: "fav") as? [String]{
             if let index = ss.firstIndex(of: "\(viewModel.game.id)"){
                 ss.remove(at: index)
@@ -174,7 +174,6 @@ class GameDetailViewController: UIViewController {
                 self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(title: "UnFavorite", style: .done, target: self, action: #selector(self.toggleFavorite))
             }
         }
-        
     }
     
     @objc func seeMoreLess(){
@@ -183,8 +182,16 @@ class GameDetailViewController: UIViewController {
 }
 extension GameDetailViewController: GameDetailViewModelDelegate{
     func didFetchCompleted() {
+        self.navigationItem.rightBarButtonItem?.isEnabled = true
+        self.websitebutton.isEnabled = true
+        self.redditButton.isEnabled = true
+        
+        titleOfDescription.text = "Game Description"
+        redditButton.setTitle("Visit reddit", for: .normal)
+        websitebutton.setTitle("Visit website", for: .normal)
+        
         let url = URL(string: "\(self.viewModel.gameDetail.background_image)")!
-        imageOfGame.downloadImage(from: url, width: self.view.frame.width, height: self.view.frame.height/3.5)
+        imageOfGame.downloadImage(from: url)
         
         detailOfGame.text = self.viewModel.gameDetail.description
         nameOfGame.text = self.viewModel.gameDetail.name

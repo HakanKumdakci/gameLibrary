@@ -1,24 +1,23 @@
 //
-//  GameCollectionViewCell.swift
+//  FavoriteGameTableViewCell.swift
 //  GameLibrary
 //
-//  Created by Hakan Kumdakçı on 9.04.2022.
+//  Created by Hakan Kumdakçı on 10.04.2022.
 //
 
 import UIKit
-import SDWebImage
 
-
-class GameCollectionViewCell: UICollectionViewCell {
+class GameTableViewCell: UITableViewCell {
     
-    static let identifier = "GameCollectionViewCell"
     var model: Game?
+    
+    static let identifier = "GameTableViewCell"
     
     let imageOfGame: UIImageView = {
         let imageView = UIImageView(frame: .zero)
         imageView.layer.cornerRadius = 0
         imageView.backgroundColor = .white
-        imageView.contentMode = .scaleAspectFill
+        imageView.layer.masksToBounds = false
         imageView.contentMode = .center
         return imageView
     }()
@@ -49,20 +48,19 @@ class GameCollectionViewCell: UICollectionViewCell {
         return label
     }()
     
-    
-    override init(frame: CGRect){
-        super.init(frame: frame)
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         contentView.addSubview(imageOfGame)
         contentView.addSubview(nameOfGame)
         contentView.addSubview(metaCritic)
         contentView.addSubview(genre)
-        
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
     
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -90,9 +88,7 @@ class GameCollectionViewCell: UICollectionViewCell {
         metaCritic.trailingToSuperview()
         metaCritic.height(18)
         
-        self.layer.cornerRadius = 4
         self.imageOfGame.backgroundColor = Helper.shared.hexStringToUIColor(hex: "000000", alpha: 0.8)
-        
     }
     
     
@@ -111,16 +107,13 @@ class GameCollectionViewCell: UICollectionViewCell {
         //check the url and get image
         if let imgUrl = model.background_image{
             let url = URL(string: imgUrl)!
-            //self.imageOfGame.downloadImage(from: url)
-            self.imageOfGame.contentMode = .scaleAspectFit
-            self.imageOfGame.sd_setImage(with: url)
+            self.imageOfGame.downloadImage(from: url)
             self.metaCritic.text = "metacritic: \(model.metacritic ?? 0)"
         }
-        
-        
     }
     
     
     
-    
 }
+
+

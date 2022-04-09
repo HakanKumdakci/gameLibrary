@@ -104,13 +104,15 @@ extension String {
 }
 
 extension UIImageView{
-    func downloadImage(from url: URL, width: CGFloat, height: CGFloat) {
+    func downloadImage(from url: URL) {
         getData(from: url) { data, response, error in
             guard let data = data, error == nil else { return }            
             // always update the UI from the main thread
             DispatchQueue.main.async() { [weak self] in
                 guard let img = UIImage(data: data) else{ return }
-                self?.image = Helper.shared.resizeImage(image: img, targetSize: CGSize(width: width, height: height))
+                self?.contentMode = .scaleAspectFit
+                self?.image = img
+                //self?.image = Helper.shared.resizeImage(image: img, targetSize: CGSize(width: width, height: height))
             }
         }
     }

@@ -26,15 +26,22 @@ class GamesViewController: UIViewController, UISearchResultsUpdating, UISearchCo
             return
         }
         
-        searchResultViewController.viewModel.search(str: text)
-        
+        searchResultViewController.viewModel.search(str: text, page: 1)
+        searchResultViewController.viewModel.searchText = text
         errorLabel.isHidden = true
     }
     
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-        gameCollectionView.isHidden = true
-        errorLabel.isHidden = false
+        guard let text = searchController.searchBar.text else { return }
+        if text.count == 0{
+            gameCollectionView.isHidden = true
+            errorLabel.isHidden = false
+        }
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        errorLabel.isHidden = true
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
@@ -81,6 +88,7 @@ class GamesViewController: UIViewController, UISearchResultsUpdating, UISearchCo
         collectionView.register(GameCollectionViewCell.self, forCellWithReuseIdentifier: "GameCollectionViewCell")
         collectionView.delegate = self
         collectionView.dataSource = self
+        
         return collectionView
     }()
     
@@ -91,9 +99,8 @@ class GamesViewController: UIViewController, UISearchResultsUpdating, UISearchCo
             viewModel!.fetchData()
         }
         
-        
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .white
@@ -101,7 +108,7 @@ class GamesViewController: UIViewController, UISearchResultsUpdating, UISearchCo
         self.navigationController?.navigationBar.prefersLargeTitles = true
         self.navigationController?.navigationItem.largeTitleDisplayMode = .always
         
-        
+        UserDefaults.standard.set([], forKey: "tapped")
         
         
         viewModel = GamesViewModel(service: NetworkingService.shared)
@@ -129,14 +136,6 @@ class GamesViewController: UIViewController, UISearchResultsUpdating, UISearchCo
         
     }
     
-    func setUpErrorLabel(){
-        
-    }
-    
-    
-    
-    
-
 }
 extension GamesViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource, UICollectionViewDelegate{
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -145,13 +144,30 @@ extension GamesViewController: UICollectionViewDelegateFlowLayout, UICollectionV
         vc.viewModel = GameDetailViewModel(service: NetworkingService.shared)
         vc.viewModel.game = viewModel?.gameApi?.results[indexPath.row]
         
-        self.navigationController?.pushViewController(vc, animated: true)
+        var us = UserDefaults.standard.array(forKey: "tapped") as! [String]
+        if us.contains("\(viewModel?.gameApi?.results[indexPath.row].id ?? 0)"){
+            
+        }else{
+            us.append("\(viewModel?.gameApi?.results[indexPath.row].id ?? 0)")
+            UserDefaults.standard.set(us, forKey: "tapped")
+            gameCollectionView.reloadItems(at: [indexPath])
+        }
         
+        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "GameCollectionViewCell", for: indexPath) as! GameCollectionViewCell
-        cell.configure(with: (viewModel?.gameApi?.results[indexPath.row])!)
+        let model = (viewModel?.gameApi?.results[indexPath.row])!
+        cell.configure(with: model)
+        
+        let us = UserDefaults.standard.array(forKey: "tapped") as! [String]
+        if us.contains("\(model.id)"){
+            cell.backgroundColor = .gray
+        }else{
+            cell.backgroundColor = .white
+        }
+        
         return cell
     }
     
@@ -160,7 +176,7 @@ extension GamesViewController: UICollectionViewDelegateFlowLayout, UICollectionV
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: self.view.frame.width, height: 160)
+        return CGSize(width: self.view.frame.width, height: 100)
     }
 }
 

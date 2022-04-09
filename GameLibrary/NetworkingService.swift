@@ -25,17 +25,16 @@ class NetworkingService: NSObject, NetworkingServiceProtocol {
         
         urlRequest.httpMethod = "GET"
         
-        let task = URLSession.shared.dataTask(with: urlRequest) { [weak self] data, response, error in
+        let task = URLSession.shared.dataTask(with: urlRequest) { data, response, error in
             
             guard let response = response as? HTTPURLResponse, (200...299).contains(response.statusCode) else{
                 print("Could not find any meaningful connect!")
                 return
             }
             
-            
             do {
                 let jsonDict = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any]
-                let json = try JSONSerialization.data(withJSONObject: jsonDict)
+                let json = try JSONSerialization.data(withJSONObject: jsonDict ?? [])
                 let decoder = JSONDecoder()
                 decoder.keyDecodingStrategy = .useDefaultKeys
                 let object = try decoder.decode(T.self, from: json)
@@ -43,7 +42,6 @@ class NetworkingService: NSObject, NetworkingServiceProtocol {
             } catch {
                 print("Function: \(#function), line: \(#line)")
             }
-            
             
         }
         task.resume()

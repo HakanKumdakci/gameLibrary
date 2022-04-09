@@ -8,22 +8,159 @@
 import UIKit
 
 class FavoriteViewController: UIViewController {
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+    
+    
+    var viewModel: FavoriteViewModel!
+    
+    var errorLabel: UILabel! = {
+        var lbl = UILabel(frame: .zero)
+        lbl.text = "There is no favorites found."
+        lbl.textAlignment = .center
+        lbl.numberOfLines = 0
+        lbl.font = UIFont(name: "Avenir-Heavy", size: 18)
+        return lbl
+    }()
+    
+    
+    lazy var gameTableView: UITableView! = {
+        var table = UITableView(frame: .zero)
+        table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        table.register(GameTableViewCell.self, forCellReuseIdentifier: "GameTableViewCell")
+        table.delegate = self
+        table.dataSource = self
+        return table
+    }()
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        errorLabel.isHidden = true
+        guard let us = UserDefaults.standard.array(forKey: "fav") else { return }
+        
+        if viewModel.favoriteGames.count != us.count{
+            viewModel.fetchData()
+            return
+        }else{
+            if us.count == 0{
+                errorLabel.isHidden = false
+            }
+        }
+        
+        checkTitle()
+        
+        
     }
     
 
-    /*
-    // MARK: - Navigation
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        self.view.backgroundColor = .white
+        
+        self.navigationController?.navigationBar.prefersLargeTitles = true
+        self.navigationController?.navigationItem.largeTitleDisplayMode = .always
+        
+        checkTitle()
+        
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+        viewModel = FavoriteViewModel(service: NetworkingService.shared)
+        viewModel?.delegate = self
+        view.addSubview(gameTableView)
+        view.addSubview(errorLabel)
+        
+        errorLabel.isHidden = true
+        // Do any additional setup after loading the view.
     }
-    */
-
+    
+    func checkTitle(){
+        guard let us = UserDefaults.standard.array(forKey: "fav") else { return }
+        if us.count != 0 {
+            title = "Favorites(\(us.count))"
+            errorLabel.isHidden = true
+        }else{
+            title = "Favorites"
+            errorLabel.isHidden = false
+        }
+    }
+    
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        
+        errorLabel.topToSuperview(offset: 48, usingSafeArea: true)
+        errorLabel.leadingToSuperview()
+        errorLabel.trailingToSuperview()
+        errorLabel.height(192)
+        
+        gameTableView.topToSuperview(offset: 32, usingSafeArea: true)
+        gameTableView.leadingToSuperview(offset: 0)
+        gameTableView.trailingToSuperview(offset: 0)
+        gameTableView.bottomToSuperview(offset: 0, usingSafeArea: true)
+        
+    }
+    
+    func showAlert(title: String, message: String, indexPath: IndexPath){
+        let sheet = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        sheet.addAction(UIAlertAction(title: "Confirm", style: .cancel, handler: { action in
+            var us = UserDefaults.standard.array(forKey: "fav") as! [String]
+            us.remove(at: us.firstIndex(of: "\(self.viewModel.favoriteGames[indexPath.row])") ?? 0)
+            UserDefaults.standard.set(us, forKey: "fav")
+            self.viewModel.favoriteGames.remove(at: indexPath.row)
+            self.gameTableView.reloadData()
+            self.checkTitle()
+        }))
+        sheet.addAction(UIAlertAction(title: "Cancel", style: .destructive, handler: { action in
+            print("aawdaw")
+        }))
+        
+        self.present(sheet, animated: true, completion: nil)
+    }
+    
 }
+
+extension FavoriteViewController: UITableViewDelegate, UITableViewDataSource{
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        gameTableView.deselectRow(at: indexPath, animated: true)
+        
+        let vc = GameDetailViewController()
+        vc.viewModel = GameDetailViewModel(service: NetworkingService.shared)
+        vc.viewModel.game = viewModel?.favoriteGames[indexPath.row]
+        
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "GameTableViewCell", for: indexPath) as! GameTableViewCell
+        cell.configure(with: viewModel.favoriteGames[indexPath.row])
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return viewModel.favoriteGames.count
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 100
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete{
+            self.showAlert(title: "Do you confirm?", message: "This game will be removed from your favorites.", indexPath: indexPath)
+            
+            
+            
+        }
+    }
+}
+
+extension FavoriteViewController: FavoriteViewModelDelegate{
+    func didFetchCompleted() {
+        DispatchQueue.main.async {
+            self.gameTableView.reloadData()
+            if self.viewModel.favoriteGames.count == 0{
+                self.errorLabel.isHidden = false
+                self.gameTableView.isHidden = true
+            }
+        }
+    }
+}
+
+

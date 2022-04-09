@@ -23,7 +23,7 @@ class SearchResultViewController: UIViewController {
         collectionView.dataSource = self
         return collectionView
     }()
-        
+    
     var errorLabel: UILabel! = {
         var lbl = UILabel(frame: .zero)
         lbl.text = "No game has been searched."
@@ -41,7 +41,7 @@ class SearchResultViewController: UIViewController {
         
         view.addSubview(gameCollectionView)
         view.addSubview(errorLabel)
-                
+        
         gameCollectionView.isHidden = true
         // Do any additional setup after loading the view.
     }
@@ -97,6 +97,11 @@ extension SearchResultViewController: UICollectionViewDelegateFlowLayout, UIColl
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "GameCollectionViewCell", for: indexPath) as! GameCollectionViewCell
         cell.configure(with: (viewModel?.searchedGameApi?.results[indexPath.row])!)
+        
+        if indexPath.row % 10 == 0{
+            let page = (indexPath.row / 10) + 1
+            viewModel.search(str: viewModel.searchText, page: page)
+        }
         return cell
     }
     
@@ -105,7 +110,7 @@ extension SearchResultViewController: UICollectionViewDelegateFlowLayout, UIColl
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: self.view.frame.width, height: 160)
+        return CGSize(width: self.view.frame.width, height: 100)
     }
 }
 
