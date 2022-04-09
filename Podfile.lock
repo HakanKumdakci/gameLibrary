@@ -1,0 +1,26 @@
+PODS:
+  - Realm (10.15.1):
+    - Realm/Headers (= 10.15.1)
+  - Realm/Headers (10.15.1)
+  - RealmSwift (10.15.1):
+    - Realm (= 10.15.1)
+  - TinyConstraints (4.0.2)
+
+DEPENDENCIES:
+  - RealmSwift
+  - TinyConstraints
+
+SPEC REPOS:
+  trunk:
+    - Realm
+    - RealmSwift
+    - TinyConstraints
+
+SPEC CHECKSUMS:
+  Realm: fbcbde2620d51623cc5b18e28f5b165c39abef52
+  RealmSwift: e4bea8e42efad3d543aea23b56504069c6faaea2
+  TinyConstraints: 7b7ccc0c485bb3bb47082138ff28bc33cd49897f
+
+PODFILE CHECKSUM: ccd94720d6a0371c8eaccec4becfeb3abb6e1340
+
+COCOAPODS: 1.11.2
