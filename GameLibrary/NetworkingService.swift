@@ -18,9 +18,8 @@ class NetworkingService: NSObject, NetworkingServiceProtocol {
     
     func getData<T: Codable>(_ t: T.Type, url: String, completion: @escaping(T) -> Void){
         
-        var urlString = "\(url)&key=3be8af6ebf124ffe81d90f514e59856c"
         
-        let url = URL(string: urlString)!
+        let url = URL(string: url)!
         
         var urlRequest = URLRequest(url: url)
         

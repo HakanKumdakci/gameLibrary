@@ -18,6 +18,7 @@ class SearchResultViewController: UIViewController {
         var collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+        collectionView.register(GameCollectionViewCell.self, forCellWithReuseIdentifier: "GameCollectionViewCell")
         collectionView.delegate = self
         collectionView.dataSource = self
         return collectionView
@@ -83,19 +84,28 @@ extension SearchResultViewController: GamesViewModelDelegate{
     }
 }
 
-extension SearchResultViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource{
+extension SearchResultViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource, UICollectionViewDelegate{
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
+        let vc = GameDetailViewController()
+        vc.viewModel = GameDetailViewModel(service: NetworkingService.shared)
+        vc.viewModel.game = viewModel?.searchedGameApi?.results[indexPath.row]
+        
+        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
-        
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "GameCollectionViewCell", for: indexPath) as! GameCollectionViewCell
+        cell.configure(with: (viewModel?.searchedGameApi?.results[indexPath.row])!)
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return viewModel?.searchedGameApi?.results.count ?? 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: self.view.frame.width, height: 160)
     }
 }
 

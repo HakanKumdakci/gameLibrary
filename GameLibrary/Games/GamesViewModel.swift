@@ -30,7 +30,7 @@ class GamesViewModel: NSObject {
     
     
     func fetchData(){
-        service.getData(GameApi.self, url: "https://api.rawg.io/api/games?page_size=10&page=1") { [weak self] result in
+        service.getData(GameApi.self, url: "https://api.rawg.io/api/games?page_size=10&page=1&key=3be8af6ebf124ffe81d90f514e59856c") { [weak self] result in
             guard let strongSelf = self else { return }
             strongSelf.gameApi = result
             strongSelf.delegate?.didFetchCompleted()
@@ -39,7 +39,7 @@ class GamesViewModel: NSObject {
     
     func search(str: String){
         if str.count >= 3{
-            service.getData(GameApi.self, url: "https://api.rawg.io/api/games?page_size=10&page=1&search=\(str)") { [weak self] result in
+            service.getData(GameApi.self, url: "https://api.rawg.io/api/games?page_size=10&page=1&search=\(str)&key=3be8af6ebf124ffe81d90f514e59856c") { [weak self] result in
                 guard let strongSelf = self else { return }
                 strongSelf.searchedGameApi = result
                 strongSelf.delegate?.didSearchComplete()

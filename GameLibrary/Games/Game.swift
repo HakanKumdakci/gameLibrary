@@ -27,3 +27,12 @@ struct Genre: Codable{
     var name: String
 }
 
+
+struct GameDetail: Codable{
+    var name: String
+    var description: String
+    var background_image: String
+    
+    var reddit_url: String?
+    var website: String?
+}
