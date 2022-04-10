@@ -108,7 +108,11 @@ class GameTableViewCell: UITableViewCell {
         if let imgUrl = model.background_image{
             let url = URL(string: imgUrl)!
             self.imageOfGame.downloadImage(from: url)
-            self.metaCritic.text = "metacritic: \(model.metacritic ?? 0)"
+            
+            let text = NSMutableAttributedString()
+            text.append(NSAttributedString(string: "metacritic: ", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black]));
+            text.append(NSAttributedString(string: "\(model.metacritic ?? 0)", attributes: [NSAttributedString.Key.foregroundColor: Helper.shared.hexStringToUIColor(hex: "#D80000", alpha: 1.0), NSAttributedString.Key.font: UIFont(name: "Avenir-Roman", size: 18.0)!] ))
+            self.metaCritic.attributedText = text
         }
     }
     

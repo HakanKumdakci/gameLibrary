@@ -46,6 +46,7 @@ class GameCollectionViewCell: UICollectionViewCell {
         label.font = UIFont(name: "Avenir-Roman", size: 16)
         label.textColor = .black
         label.textAlignment = .left
+        label.numberOfLines = 0
         return label
     }()
     
@@ -114,7 +115,11 @@ class GameCollectionViewCell: UICollectionViewCell {
             //self.imageOfGame.downloadImage(from: url)
             self.imageOfGame.contentMode = .scaleAspectFit
             self.imageOfGame.sd_setImage(with: url)
-            self.metaCritic.text = "metacritic: \(model.metacritic ?? 0)"
+            
+            let text = NSMutableAttributedString()
+            text.append(NSAttributedString(string: "metacritic: ", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black]));
+            text.append(NSAttributedString(string: "\(model.metacritic ?? 0)", attributes: [NSAttributedString.Key.foregroundColor: Helper.shared.hexStringToUIColor(hex: "#D80000", alpha: 1.0), NSAttributedString.Key.font: UIFont(name: "Avenir-Roman", size: 18.0)!] ))
+            self.metaCritic.attributedText = text
         }
         
         

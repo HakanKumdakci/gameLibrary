@@ -9,31 +9,23 @@ import UIKit
 
 import TinyConstraints
 
-class GamesViewController: UIViewController, UISearchResultsUpdating, UISearchControllerDelegate, UISearchBarDelegate {
-    
-    
-    func updateSearchResults(for searchController: UISearchController) {
-        guard let text = searchController.searchBar.text else { return }
-        //searchResultViewController.viewModel.search(str: text)
-        //viewModel?.search(str: text)
-        
-    }
+class GamesViewController: UIViewController, UISearchControllerDelegate, UISearchBarDelegate {
     
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-        guard let text = searchController.searchBar.text else { return }
+        guard let text = searchController.searchBar.text else {return }
         
         if text.count < 3{
             return
         }
         
-        searchResultViewController.viewModel.search(str: text, page: 1)
+        searchResultViewController.viewModel.fetchData(str: text)
         searchResultViewController.viewModel.searchText = text
         errorLabel.isHidden = true
     }
     
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-        guard let text = searchController.searchBar.text else { return }
+        guard let text = searchController.searchBar.text else {return }
         if text.count == 0{
             gameCollectionView.isHidden = true
             errorLabel.isHidden = false
@@ -67,11 +59,9 @@ class GamesViewController: UIViewController, UISearchResultsUpdating, UISearchCo
     
     
     lazy var searchController: UISearchController = {
-        searchResultViewController = SearchResultViewController()
         var searchController = UISearchController(searchResultsController: searchResultViewController)
         searchController.searchBar.sizeToFit()
         searchController.searchBar.placeholder = "Search here..."
-        searchController.searchResultsUpdater = self
         searchController.delegate = self
         searchController.searchBar.delegate = self
         return searchController
@@ -92,6 +82,30 @@ class GamesViewController: UIViewController, UISearchResultsUpdating, UISearchCo
         return collectionView
     }()
     
+    lazy var nextButton: UIButton = {
+        var btn = UIButton(type: .system)
+        btn.setTitle("Next", for: .normal)
+        btn.backgroundColor = .clear
+        btn.tintColor = .systemBlue
+        btn.tag = 2
+        btn.titleLabel?.font = UIFont(name: "Avenir-Roman", size: 18)
+        btn.addTarget(self, action: #selector(getNewPage(sender:)), for: .touchUpInside)
+        btn.isEnabled = false
+        return btn
+    }()
+    
+    lazy var prevButton: UIButton = {
+        var btn = UIButton(type: .system)
+        btn.setTitle("Previous", for: .normal)
+        btn.backgroundColor = .clear
+        btn.tintColor = .systemBlue
+        btn.tag = 1
+        btn.titleLabel?.font = UIFont(name: "Avenir-Roman", size: 18)
+        btn.addTarget(self, action: #selector(getNewPage(sender:)), for: .touchUpInside)
+        btn.isEnabled = false
+        return btn
+    }()
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -110,6 +124,9 @@ class GamesViewController: UIViewController, UISearchResultsUpdating, UISearchCo
         
         UserDefaults.standard.set([], forKey: "tapped")
         
+        searchResultViewController = SearchResultViewController()
+        searchResultViewController.delegate = self
+        
         
         viewModel = GamesViewModel(service: NetworkingService.shared)
         viewModel?.delegate = self
@@ -118,7 +135,17 @@ class GamesViewController: UIViewController, UISearchResultsUpdating, UISearchCo
         view.addSubview(errorLabel)
         
         errorLabel.isHidden = true
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.rotated), name: UIDevice.orientationDidChangeNotification, object: nil)
         // Do any additional setup after loading the view.
+    }
+    
+    deinit {
+       NotificationCenter.default.removeObserver(self, name: UIDevice.orientationDidChangeNotification, object: nil)
+    }
+    
+    @objc func rotated() {
+        gameCollectionView.reloadData()
     }
     
     override func viewWillLayoutSubviews() {
@@ -132,18 +159,32 @@ class GamesViewController: UIViewController, UISearchResultsUpdating, UISearchCo
         gameCollectionView.topToSuperview(offset: 32, usingSafeArea: true)
         gameCollectionView.leadingToSuperview(offset: 0)
         gameCollectionView.trailingToSuperview(offset: 0)
-        gameCollectionView.bottomToSuperview(offset: 0, usingSafeArea: true)
-        
+        gameCollectionView.bottomToSuperview(offset: -36, usingSafeArea: true)
+    }
+    
+    @objc func getNewPage(sender: UIButton){
+        self.gameCollectionView.selectItem(at: IndexPath(row: 0, section: 0), animated: true, scrollPosition: .top)
+        if sender.tag == 1{
+            viewModel?.fetchData(optionalURL: "\(viewModel?.gameApi?.previous ?? "")")
+        }else{
+            viewModel?.fetchData(optionalURL: "\(viewModel?.gameApi?.next ?? "")")
+        }
     }
     
 }
 extension GamesViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource, UICollectionViewDelegate{
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
+        //if user touch on button cell
+        if indexPath.row == viewModel?.gameApi?.results.count{
+            return
+        }
+        //prepare view to push
         let vc = GameDetailViewController()
         vc.viewModel = GameDetailViewModel(service: NetworkingService.shared)
         vc.viewModel.game = viewModel?.gameApi?.results[indexPath.row]
         
+        //make gray when pressed on game cell
         var us = UserDefaults.standard.array(forKey: "tapped") as! [String]
         if us.contains("\(viewModel?.gameApi?.results[indexPath.row].id ?? 0)"){
             
@@ -157,6 +198,23 @@ extension GamesViewController: UICollectionViewDelegateFlowLayout, UICollectionV
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        if indexPath.row == viewModel?.gameApi?.results.count{
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
+            cell.addSubview(prevButton)
+            cell.addSubview(nextButton)
+            prevButton.leadingToSuperview(offset: 16)
+            prevButton.centerYToSuperview()
+            prevButton.height(36)
+            prevButton.width(96)
+            
+            nextButton.trailingToSuperview(offset: 16)
+            nextButton.centerYToSuperview()
+            nextButton.height(36)
+            nextButton.width(96)
+            
+            return cell
+        }
+        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "GameCollectionViewCell", for: indexPath) as! GameCollectionViewCell
         let model = (viewModel?.gameApi?.results[indexPath.row])!
         cell.configure(with: model)
@@ -172,11 +230,17 @@ extension GamesViewController: UICollectionViewDelegateFlowLayout, UICollectionV
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModel?.gameApi?.results.count ?? 0
+        return (viewModel?.gameApi?.results.count ?? -1) + 1
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: self.view.frame.width, height: 100)
+        let height = indexPath.row == viewModel?.gameApi?.results.count ? 40.0 : 100.0
+        if UIDevice.current.orientation.isLandscape {
+            return CGSize(width: self.view.frame.width/2.1, height: height)
+        } else {
+            return CGSize(width: self.view.frame.width, height: height)
+        }
+        
     }
 }
 
@@ -189,7 +253,16 @@ extension GamesViewController: GamesViewModelDelegate{
     func didFetchCompleted() {
         DispatchQueue.main.async {
             self.gameCollectionView.reloadData()
+            self.nextButton.isEnabled =  self.viewModel?.gameApi?.next == nil ? false : true
+            self.prevButton.isEnabled =  self.viewModel?.gameApi?.previous == nil ? false : true
         }
     }
     
+}
+
+
+extension GamesViewController: SearchResultViewControllerDelegate{
+    func openDetail(vc: GameDetailViewController) {
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
 }

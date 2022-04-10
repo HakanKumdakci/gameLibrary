@@ -34,7 +34,7 @@ class FavoriteViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         errorLabel.isHidden = true
-        guard let us = UserDefaults.standard.array(forKey: "fav") else { return }
+        guard let us = UserDefaults.standard.array(forKey: "fav") else{ return }
         
         if viewModel.favoriteGames.count != us.count{
             viewModel.fetchData()
@@ -72,7 +72,7 @@ class FavoriteViewController: UIViewController {
     }
     
     func checkTitle(){
-        guard let us = UserDefaults.standard.array(forKey: "fav") else { return }
+        guard let us = UserDefaults.standard.array(forKey: "fav") else{ return }
         if us.count != 0 {
             title = "Favorites(\(us.count))"
             errorLabel.isHidden = true
@@ -99,6 +99,9 @@ class FavoriteViewController: UIViewController {
     
     func showAlert(title: String, message: String, indexPath: IndexPath){
         let sheet = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        sheet.addAction(UIAlertAction(title: "Cancel", style: .destructive, handler: { action in
+            print("aawdaw")
+        }))
         sheet.addAction(UIAlertAction(title: "Confirm", style: .cancel, handler: { action in
             var us = UserDefaults.standard.array(forKey: "fav") as! [String]
             us.remove(at: us.firstIndex(of: "\(self.viewModel.favoriteGames[indexPath.row])") ?? 0)
@@ -107,10 +110,6 @@ class FavoriteViewController: UIViewController {
             self.gameTableView.reloadData()
             self.checkTitle()
         }))
-        sheet.addAction(UIAlertAction(title: "Cancel", style: .destructive, handler: { action in
-            print("aawdaw")
-        }))
-        
         self.present(sheet, animated: true, completion: nil)
     }
     

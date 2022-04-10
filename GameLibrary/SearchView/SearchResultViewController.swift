@@ -8,15 +8,19 @@
 import UIKit
 import TinyConstraints
 
+protocol SearchResultViewControllerDelegate: AnyObject{
+    func openDetail(vc: GameDetailViewController)
+}
+
 class SearchResultViewController: UIViewController {
+    
+    weak var delegate: SearchResultViewControllerDelegate?
     
     lazy var gameCollectionView: UICollectionView = {
         
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
-        
         var collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
         collectionView.register(GameCollectionViewCell.self, forCellWithReuseIdentifier: "GameCollectionViewCell")
         collectionView.delegate = self
@@ -32,18 +36,53 @@ class SearchResultViewController: UIViewController {
         lbl.font = UIFont(name: "Avenir-Heavy", size: 18)
         return lbl
     }()
-    var viewModel: GamesViewModel!
+    
+    lazy var nextButton: UIButton = {
+        var btn = UIButton(type: .system)
+        btn.setTitle("Next", for: .normal)
+        btn.backgroundColor = .clear
+        btn.tintColor = .systemBlue
+        btn.tag = 2
+        btn.titleLabel?.font = UIFont(name: "Avenir-Roman", size: 18)
+        btn.addTarget(self, action: #selector(getNewPage(sender:)), for: .touchUpInside)
+        btn.isEnabled = false
+        return btn
+    }()
+    
+    lazy var prevButton: UIButton = {
+        var btn = UIButton(type: .system)
+        btn.setTitle("Previous", for: .normal)
+        btn.backgroundColor = .clear
+        btn.tintColor = .systemBlue
+        btn.tag = 1
+        btn.titleLabel?.font = UIFont(name: "Avenir-Roman", size: 18)
+        btn.addTarget(self, action: #selector(getNewPage(sender:)), for: .touchUpInside)
+        btn.isEnabled = false
+        return btn
+    }()
+    
+    var viewModel: SearchResultViewModel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel = GamesViewModel(service: NetworkingService.shared)
+        viewModel = SearchResultViewModel(service: NetworkingService.shared)
         viewModel.delegate = self
         
         view.addSubview(gameCollectionView)
         view.addSubview(errorLabel)
         
         gameCollectionView.isHidden = true
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.rotated), name: UIDevice.orientationDidChangeNotification, object: nil)
         // Do any additional setup after loading the view.
+    }
+    
+    deinit {
+       NotificationCenter.default.removeObserver(self, name: UIDevice.orientationDidChangeNotification, object: nil)
+    }
+    
+    @objc func rotated() {
+        gameCollectionView.reloadData()
     }
     
     override func viewWillLayoutSubviews() {
@@ -60,11 +99,20 @@ class SearchResultViewController: UIViewController {
         gameCollectionView.bottomToSuperview(offset: 0, usingSafeArea: true)
     }
     
+    @objc func getNewPage(sender: UIButton){
+        self.gameCollectionView.selectItem(at: IndexPath(row: 0, section: 0), animated: true, scrollPosition: .top)
+        if sender.tag == 1{
+            viewModel.fetchData(str: viewModel.searchText, optionalURL: viewModel.searchedGameApi?.previous ?? "")
+        }else{
+            viewModel.fetchData(str: viewModel.searchText, optionalURL: viewModel.searchedGameApi?.next ?? "")
+        }
+    }
+    
     
     
 }
 
-extension SearchResultViewController: GamesViewModelDelegate{
+extension SearchResultViewController: SearchResultViewModelDelegate{
     func didSearchComplete() {
         DispatchQueue.main.async {
             if self.viewModel?.searchedGameApi?.results.count == 0{
@@ -72,45 +120,64 @@ extension SearchResultViewController: GamesViewModelDelegate{
                 self.gameCollectionView.isHidden = true
                 self.errorLabel.text = "Could not found any game according to your search."
             }else{
-                self.gameCollectionView.reloadData()
                 self.gameCollectionView.isHidden = false
                 self.errorLabel.isHidden = true
+                self.gameCollectionView.reloadData()
+                self.nextButton.isEnabled =  self.viewModel?.searchedGameApi?.next == nil ? false : true
+                self.prevButton.isEnabled =  self.viewModel?.searchedGameApi?.previous == nil ? false : true
             }
         }
-    }
-    
-    func didFetchCompleted() {
-        
     }
 }
 
 extension SearchResultViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource, UICollectionViewDelegate{
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
+        
+        if indexPath.row == viewModel?.searchedGameApi?.results.count{
+            return
+        }
+        
         let vc = GameDetailViewController()
         vc.viewModel = GameDetailViewModel(service: NetworkingService.shared)
         vc.viewModel.game = viewModel?.searchedGameApi?.results[indexPath.row]
+        self.delegate?.openDetail(vc: vc)
         
-        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        if indexPath.row == viewModel?.searchedGameApi?.results.count{
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
+            cell.addSubview(prevButton)
+            cell.addSubview(nextButton)
+            prevButton.leadingToSuperview(offset: 16)
+            prevButton.centerYToSuperview()
+            prevButton.height(36)
+            prevButton.width(96)
+            
+            nextButton.trailingToSuperview(offset: 16)
+            nextButton.centerYToSuperview()
+            nextButton.height(36)
+            nextButton.width(96)
+            
+            return cell
+        }
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "GameCollectionViewCell", for: indexPath) as! GameCollectionViewCell
         cell.configure(with: (viewModel?.searchedGameApi?.results[indexPath.row])!)
-        
-        if indexPath.row % 10 == 0{
-            let page = (indexPath.row / 10) + 1
-            viewModel.search(str: viewModel.searchText, page: page)
-        }
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModel?.searchedGameApi?.results.count ?? 0
+        return (viewModel?.searchedGameApi?.results.count ?? -1) + 1
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: self.view.frame.width, height: 100)
+        let height = indexPath.row == viewModel?.searchedGameApi?.results.count ? 40.0 : 100.0
+        if UIDevice.current.orientation.isLandscape {
+            return CGSize(width: self.view.frame.width/2.1, height: height)
+        } else {
+            return CGSize(width: self.view.frame.width, height: height)
+        }
     }
 }
 

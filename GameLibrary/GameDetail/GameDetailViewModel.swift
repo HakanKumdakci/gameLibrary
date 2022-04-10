@@ -25,13 +25,13 @@ class GameDetailViewModel: NSObject {
     
     func fetchData(){
         service.getData(GameDetail.self, url: "https://api.rawg.io/api/games/\(game.id)?key=3be8af6ebf124ffe81d90f514e59856c") { [weak self] result in
-            guard let strongSelf = self else { return }
+            guard let strongSelf = self else {return }
             strongSelf.gameDetail = result
-            DispatchQueue.main.async {
-                strongSelf.delegate?.didFetchCompleted()
-            }
-            
+            strongSelf.delegate?.didFetchCompleted()
         }
     }
+    
+    
+    
     
 }

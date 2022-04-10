@@ -9,28 +9,53 @@ import XCTest
 @testable import GameLibrary
 
 class GameLibraryTests: XCTestCase {
+    
+    var viewModel: GamesViewModel!
+    var service: MockService!
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        
+        service = MockService()
+        viewModel = GamesViewModel(service: service)
     }
 
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        service = nil
+        viewModel.service = nil
+        viewModel = nil
     }
 
     func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
+        
+        viewModel.fetchData()
+        XCTAssertEqual(viewModel.gameApi?.results.count, 10)
+        
+        }
 
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+}
+
+
+
+class MockService: NetworkingServiceProtocol{
+    func getData<T>(_ t: T.Type, url: String, completion: @escaping (T) -> Void) where T : Decodable, T : Encodable {
+        var str = "data"
+        //if gameDetail calls
+        if url.split(separator: "/").contains("games") == true{
+            str = "dataInstance"
+        }
+        if let url = Bundle.main.url(forResource: str, withExtension: "json") {
+                do {
+                    let data = try Data(contentsOf: url)
+                    let decoder = JSONDecoder()
+                    let jsonData = try decoder.decode(T.self, from: data)
+                    completion(jsonData)
+                } catch {
+                    print("error:\(error)")
+                }
+        }else{
+            print()
         }
     }
-
+    
+    
 }

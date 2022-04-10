@@ -7,7 +7,6 @@ target 'GameLibrary' do
 
   # Pods for GameLibrary
 pod 'TinyConstraints'
-pod 'RealmSwift'
 pod 'SDWebImage'
 
   target 'GameLibraryTests' do
