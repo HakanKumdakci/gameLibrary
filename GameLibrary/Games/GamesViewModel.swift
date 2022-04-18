@@ -26,7 +26,9 @@ class GamesViewModel: NSObject {
     
     
     func fetchData(optionalURL: String = ""){
-        let url = (optionalURL == "") ? "https://api.rawg.io/api/games?page_size=10&page=1&key=3be8af6ebf124ffe81d90f514e59856c" : optionalURL
+        guard let api = Bundle.main.object(forInfoDictionaryKey: "baseUrl") as? String else{ return }
+                
+        let url = (optionalURL == "") ? api : optionalURL
         service.getData(GameApi.self, url: url) { [weak self] result in
             guard let strongSelf = self else { return }
             strongSelf.gameApi = result

@@ -25,19 +25,23 @@ class FavoriteViewModel: NSObject {
     }
     
     func fetchData(){
+        guard let key = Bundle.main.object(forInfoDictionaryKey: "privateKey") as? String else{ return }
+        guard let api = Bundle.main.object(forInfoDictionaryKey: "gameDetail") as? String else{ return }
+        
         self.favoriteGames = []
         
-        guard let us = UserDefaults.standard.array(forKey: "fav") else{return }
+        guard let favoriteGameIds = UserDefaults.standard.array(forKey: "fav") else{return }
         
-        if us.count == 0{
+        if favoriteGameIds.count == 0{
             self.delegate?.didFetchCompleted()
             return
         }
         
+        
         let myGroup = DispatchGroup()
-        for i in us {
+        for id in favoriteGameIds {
             myGroup.enter()
-            service.getData(Game.self, url: "https://api.rawg.io/api/games/\(i)?key=3be8af6ebf124ffe81d90f514e59856c") { [weak self] result in
+            service.getData(Game.self, url: "\(api)\(id)?key=\(key)") { [weak self] result in
                 guard let strongSelf = self else {return }
                 strongSelf.favoriteGames.append(result)
                 myGroup.leave()

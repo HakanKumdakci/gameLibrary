@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		2733A3F865501CF065471839 /* Pods_GameLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39FC7B4CDF3FF3CA415A2673 /* Pods_GameLibrary.framework */; };
 		2813BB5E280D52F200AC05A6 /* RealmService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2813BB5D280D52F200AC05A6 /* RealmService.swift */; };
+		2813BB60280DECEE00AC05A6 /* ApiConfig.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 2813BB5F280DECEE00AC05A6 /* ApiConfig.xcconfig */; };
 		284BE96B2802F1AD00868B4C /* data.json in Resources */ = {isa = PBXBuildFile; fileRef = 284BE96A2802F1AD00868B4C /* data.json */; };
 		284BE96D2802F4B500868B4C /* GameDetailTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 284BE96C2802F4B500868B4C /* GameDetailTest.swift */; };
 		284BE96F2802F62700868B4C /* dataInstance.json in Resources */ = {isa = PBXBuildFile; fileRef = 284BE96E2802F62700868B4C /* dataInstance.json */; };
@@ -57,6 +58,7 @@
 /* Begin PBXFileReference section */
 		157640F84866AA9EAD9DC19B /* Pods_GameLibraryTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GameLibraryTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2813BB5D280D52F200AC05A6 /* RealmService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealmService.swift; sourceTree = "<group>"; };
+		2813BB5F280DECEE00AC05A6 /* ApiConfig.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ApiConfig.xcconfig; sourceTree = "<group>"; };
 		284BE96A2802F1AD00868B4C /* data.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = data.json; sourceTree = "<group>"; };
 		284BE96C2802F4B500868B4C /* GameDetailTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDetailTest.swift; sourceTree = "<group>"; };
 		284BE96E2802F62700868B4C /* dataInstance.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = dataInstance.json; sourceTree = "<group>"; };
@@ -173,6 +175,7 @@
 				284BE96E2802F62700868B4C /* dataInstance.json */,
 				28DCBE0E2800C991002055F5 /* AppDelegate.swift */,
 				28DCBE102800C991002055F5 /* SceneDelegate.swift */,
+				2813BB5F280DECEE00AC05A6 /* ApiConfig.xcconfig */,
 				2813BB5C280D52E300AC05A6 /* Resources */,
 				28DCBE3E2800CAEE002055F5 /* TabBarViewController.swift */,
 				28DCBE4A2800CBF4002055F5 /* Helper.swift */,
@@ -361,6 +364,7 @@
 				28DCBE182800C993002055F5 /* Assets.xcassets in Resources */,
 				284BE96B2802F1AD00868B4C /* data.json in Resources */,
 				28DCBE162800C991002055F5 /* Main.storyboard in Resources */,
+				2813BB60280DECEE00AC05A6 /* ApiConfig.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -562,6 +566,7 @@
 /* Begin XCBuildConfiguration section */
 		28DCBE332800C993002055F5 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2813BB5F280DECEE00AC05A6 /* ApiConfig.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -622,6 +627,7 @@
 		};
 		28DCBE342800C993002055F5 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2813BB5F280DECEE00AC05A6 /* ApiConfig.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;

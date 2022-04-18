@@ -31,8 +31,12 @@ class SearchResultViewModel: NSObject {
     }
     
     func fetchData(str: String, optionalURL:  String = ""){
+        
+        guard let key = Bundle.main.object(forInfoDictionaryKey: "privateKey") as? String else{ return }
+        guard let gameSearch = Bundle.main.object(forInfoDictionaryKey: "gameSearch") as? String else{ return }
+        
         self.searchText = str
-        let url = (optionalURL == "") ? "https://api.rawg.io/api/games?page_size=10&page=1&search=\(str.stripped)&key=3be8af6ebf124ffe81d90f514e59856c" : optionalURL
+        let url = (optionalURL == "") ? "\(gameSearch)\(str.stripped)&key=\(key)" : optionalURL
         service.getData(GameApi.self, url: url) { [weak self] result in
             guard let strongSelf = self else {return }
             strongSelf.searchedGameApi = result

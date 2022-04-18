@@ -144,7 +144,7 @@ class GamesViewController: UIViewController, UISearchControllerDelegate, UISearc
             viewModel!.fetchData()
         }
         
-        if UserDefaults.standard.bool(forKey: "searched"){
+        if UserDefaults.standard.bool(forKey: "searched") && UserDefaults.standard.string(forKey: "key") != nil{
             searchController.searchBar.becomeFirstResponder()
         }
         

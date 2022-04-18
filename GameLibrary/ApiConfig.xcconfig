@@ -1,0 +1,18 @@
+//
+//  ApiConfig.xcconfig
+//  GameLibrary
+//
+//  Created by Hakan Kumdakçı on 18.04.2022.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+baseUrl = https:/$()/api.rawg.io/api/games?page_size=10&page=1&key=3be8af6ebf124ffe81d90f514e59856c
+
+privateKey = 3be8af6ebf124ffe81d90f514e59856c
+
+
+gameDetail = https:/$()/api.rawg.io/api/games/
+
+gameSearch = https:/$()/api.rawg.io/api/games?page_size=10&page=1&search=

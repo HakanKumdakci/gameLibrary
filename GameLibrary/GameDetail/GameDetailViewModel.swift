@@ -22,16 +22,14 @@ class GameDetailViewModel: NSObject {
         self.service = service
     }
     
-    
     func fetchData(){
-        service.getData(GameDetail.self, url: "https://api.rawg.io/api/games/\(game.id)?key=3be8af6ebf124ffe81d90f514e59856c") { [weak self] result in
+        guard let key = Bundle.main.object(forInfoDictionaryKey: "privateKey") as? String else{ return }
+        guard let api = Bundle.main.object(forInfoDictionaryKey: "gameDetail") as? String else{ return }
+        
+        service.getData(GameDetail.self, url: "\(api)\(game.id)?key=\(key)") { [weak self] result in
             guard let strongSelf = self else {return }
             strongSelf.gameDetail = result
             strongSelf.delegate?.didFetchCompleted()
         }
     }
-    
-    
-    
-    
 }
