@@ -21,13 +21,13 @@ class FavoriteViewController: UIViewController {
         return lbl
     }()
     
-    
     lazy var gameTableView: UITableView! = {
         var table = UITableView(frame: .zero)
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         table.register(GameTableViewCell.self, forCellReuseIdentifier: "GameTableViewCell")
         table.delegate = self
         table.dataSource = self
+        table.separatorStyle = .none
         return table
     }()
     
@@ -44,10 +44,7 @@ class FavoriteViewController: UIViewController {
                 errorLabel.isHidden = false
             }
         }
-        
         checkTitle()
-        
-        
     }
     
 
@@ -137,7 +134,7 @@ extension FavoriteViewController: UITableViewDelegate, UITableViewDataSource{
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 100
+        return 110
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {

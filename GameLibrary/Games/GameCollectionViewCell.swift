@@ -18,8 +18,7 @@ class GameCollectionViewCell: UICollectionViewCell {
         let imageView = UIImageView(frame: .zero)
         imageView.layer.cornerRadius = 0
         imageView.backgroundColor = .white
-        imageView.contentMode = .scaleAspectFill
-        imageView.contentMode = .center
+        imageView.contentMode = .scaleToFill
         return imageView
     }()
     
@@ -81,7 +80,7 @@ class GameCollectionViewCell: UICollectionViewCell {
         nameOfGame.trailingToSuperview()
         nameOfGame.height(54)
         
-        genre.bottom(to: imageOfGame)
+        genre.bottom(to: imageOfGame, offset: -6)
         genre.leadingToTrailing(of: imageOfGame, offset: 12)
         genre.trailingToSuperview(offset: 12)
         genre.height(18)
@@ -111,10 +110,11 @@ class GameCollectionViewCell: UICollectionViewCell {
         }
         //check the url and get image
         if let imgUrl = model.background_image{
-            let url = URL(string: imgUrl)!
-            //self.imageOfGame.downloadImage(from: url)
-            self.imageOfGame.contentMode = .scaleAspectFit
-            self.imageOfGame.sd_setImage(with: url)
+            if imgUrl != ""{
+                let url = URL(string: imgUrl)!
+                //self.imageOfGame.downloadImage(from: url)
+                self.imageOfGame.sd_setImage(with: url)
+            }
             
             let text = NSMutableAttributedString()
             text.append(NSAttributedString(string: "metacritic: ", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black]));

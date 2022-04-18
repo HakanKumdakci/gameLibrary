@@ -14,7 +14,19 @@ class GamesViewController: UIViewController, UISearchControllerDelegate, UISearc
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
         guard let text = searchController.searchBar.text else {return }
         
-        if text.count < 3{
+        UserDefaults.standard.set(true, forKey: "searched")
+        
+        if let searchKey = UserDefaults.standard.string(forKey: "key"){
+            if searchKey == text{
+                searchResultViewController.viewModel.searchText = text
+                searchResultViewController.viewModel.fetchFromRealm()
+                errorLabel.isHidden = true
+                return
+            }
+        }
+        
+        if text.count <= 3{
+            UserDefaults.standard.set(nil, forKey: "key")
             return
         }
         
@@ -26,6 +38,19 @@ class GamesViewController: UIViewController, UISearchControllerDelegate, UISearc
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
         guard let text = searchController.searchBar.text else {return }
+        
+        //fetch latest search screen
+        if let searchKey = UserDefaults.standard.string(forKey: "key"){
+            if searchKey != ""{
+                if text == ""{
+                    searchController.searchBar.text = searchKey
+                    searchController.searchBar.endEditing(true)
+                }else{
+                    
+                }
+            }
+        }
+        //first search screen
         if text.count == 0{
             gameCollectionView.isHidden = true
             errorLabel.isHidden = false
@@ -33,19 +58,25 @@ class GamesViewController: UIViewController, UISearchControllerDelegate, UISearc
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        errorLabel.isHidden = true
+        
+        if searchBar.text == "" {
+            searchResultViewController.viewModel.searchedGameApi = nil
+            searchResultViewController.gameCollectionView.reloadData()
+            errorLabel.isHidden = false
+        }else{
+            errorLabel.isHidden = true
+        }
     }
+    
+    
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         gameCollectionView.isHidden = false
         errorLabel.isHidden = true
+        UserDefaults.standard.set(false, forKey: "searched")
     }
     
-    
-    
-    
     var viewModel: GamesViewModel?
-    
     var searchResultViewController : SearchResultViewController!
     
     var errorLabel: UILabel! = {
@@ -61,7 +92,7 @@ class GamesViewController: UIViewController, UISearchControllerDelegate, UISearc
     lazy var searchController: UISearchController = {
         var searchController = UISearchController(searchResultsController: searchResultViewController)
         searchController.searchBar.sizeToFit()
-        searchController.searchBar.placeholder = "Search here..."
+        searchController.searchBar.placeholder = "Search Games"
         searchController.delegate = self
         searchController.searchBar.delegate = self
         return searchController
@@ -111,6 +142,10 @@ class GamesViewController: UIViewController, UISearchControllerDelegate, UISearc
         
         if viewModel?.gameApi == nil{
             viewModel!.fetchData()
+        }
+        
+        if UserDefaults.standard.bool(forKey: "searched"){
+            searchController.searchBar.becomeFirstResponder()
         }
         
     }
@@ -221,7 +256,7 @@ extension GamesViewController: UICollectionViewDelegateFlowLayout, UICollectionV
         
         let us = UserDefaults.standard.array(forKey: "tapped") as! [String]
         if us.contains("\(model.id)"){
-            cell.backgroundColor = .gray
+            cell.backgroundColor = Helper.shared.hexStringToUIColor(hex: "E0E0E0", alpha: 1.0)
         }else{
             cell.backgroundColor = .white
         }

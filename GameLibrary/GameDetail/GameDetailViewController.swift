@@ -49,7 +49,7 @@ class GameDetailViewController: UIViewController {
         textView.isEditable = false
         textView.isUserInteractionEnabled = true
         textView.textContainer.lineBreakMode = .byTruncatingTail
-        textView.font = UIFont(name: "Avenir-Roman", size: 16)
+        textView.font = UIFont(name: "Avenir-Roman", size: 15)
         return textView
     }()
     
@@ -156,7 +156,7 @@ class GameDetailViewController: UIViewController {
         detailTableView.topToBottom(of: imageOfGame, offset: 16)
         detailTableView.leadingToSuperview(offset: 16)
         detailTableView.trailingToSuperview(offset: 16)
-        detailTableView.bottomToSuperview()
+        detailTableView.bottomToSuperview(offset: 0, usingSafeArea: true)
         
     }
     
@@ -234,7 +234,7 @@ extension GameDetailViewController: UITableViewDelegate, UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if indexPath.row == 0{
-            return expandedDetail ? self.view.frame.height/2.4 : self.view.frame.height/6
+            return expandedDetail ? self.view.frame.height/1.6 : self.view.frame.height/6
         }else if indexPath.row == 1{
             return 48
         }else{

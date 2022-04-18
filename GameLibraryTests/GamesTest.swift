@@ -7,15 +7,18 @@
 
 import XCTest
 @testable import GameLibrary
+import Realm
+import RealmSwift
 
 class GameLibraryTests: XCTestCase {
     
     var viewModel: GamesViewModel!
     var service: MockService!
-
+    
     override func setUpWithError() throws {
         
         service = MockService()
+        
         viewModel = GamesViewModel(service: service)
     }
 
@@ -56,6 +59,5 @@ class MockService: NetworkingServiceProtocol{
             print()
         }
     }
-    
-    
 }
+

@@ -121,3 +121,31 @@ extension UIImageView{
         URLSession.shared.dataTask(with: url, completionHandler: completion).resume()
     }
 }
+
+
+extension Encodable {
+    /// Encode into JSON and return `Data`
+    func jsonData() throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        encoder.dateEncodingStrategy = .iso8601
+        return try encoder.encode(self)
+    }
+}
+
+protocol DispatchQueueType {
+    func async(execute work: @escaping @convention(block) () -> Void)
+}
+
+extension DispatchQueue: DispatchQueueType {
+    func async(execute work: @escaping @convention(block) () -> Void) {
+        async(group: nil, qos: .unspecified, flags: [], execute: work)
+    }
+}
+
+extension String {
+    var stripped: String {
+        let okayChars = Set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
+        return self.filter {okayChars.contains($0) }
+    }
+}
