@@ -96,7 +96,7 @@ class SearchResultViewController: UIViewController {
         gameCollectionView.bottomToSuperview(offset: 0, usingSafeArea: true)
     }
     
-    @objc func getNewPage(sender: UIButton){
+    @objc func getNewPage(sender: UIButton) {
         self.gameCollectionView.selectItem(at: IndexPath(row: 0, section: 0), animated: true, scrollPosition: .top)
         if sender.tag == 1{
             viewModel.fetchData(str: viewModel.searchText, optionalURL: viewModel.searchedGameApi?.previous ?? "")
@@ -136,7 +136,7 @@ extension SearchResultViewController: UICollectionViewDelegateFlowLayout, UIColl
         }
         
         let vc = GameDetailViewController()
-        vc.viewModel = GameDetailViewModel(service: NetworkingService())
+        vc.viewModel = GameDetailViewModel()
         vc.viewModel.game = viewModel?.searchedGameApi?.results[indexPath.row]
         self.delegate?.openDetail(vc: vc)
     }

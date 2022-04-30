@@ -163,7 +163,7 @@ class GameDetailViewController: UIViewController {
         
     }
     
-    @objc private func openSafari(sender: UIButton){
+    @objc private func openSafari(sender: UIButton) {
         guard var url = URL(string: "\(self.viewModel.gameDetail.reddit_url ?? "")") else {return }
         
         if sender.tag == 2{

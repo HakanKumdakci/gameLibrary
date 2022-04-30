@@ -9,23 +9,21 @@ import XCTest
 @testable import GameLibrary
 import Realm
 import RealmSwift
-
+import Moya
 class SearchResultTest: XCTestCase {
     
     var viewModel: SearchResultViewModel!
-    var networkingService: MockService!
     var dispatch: DispatchQueueType!
     var realmService: RealmService!
     
     override func setUpWithError() throws {
-        networkingService = MockService()
         dispatch = DispatchQueueMock()
         realmService = RealmService(test: true)
-        viewModel = SearchResultViewModel(service: networkingService, realmService: realmService, dispatchQueue: dispatch)
+        viewModel = SearchResultViewModel(realmService: realmService, dispatchQueue: dispatch)
+        viewModel.gameProvider = MoyaProvider<MoyaService>(stubClosure: MoyaProvider.immediatelyStub)
     }
     
     override func tearDownWithError() throws {
-        networkingService = nil
         dispatch = nil
         
         try! realmService.realm?.write{
@@ -41,30 +39,30 @@ class SearchResultTest: XCTestCase {
         XCTAssertEqual(viewModel.searchedGameApi?.results.count, 10)
     }
     
-    func testRealm(){
+    func testRealm() {
         viewModel.fetchData(str: "str")
         
-        let objects = viewModel.realmService.get(GameRealm.self)
+        let objects = viewModel.realmService?.get(GameRealm.self)
         
         XCTAssertEqual(objects?.count, 10)
     }
     
-    func testCleanRealm(){
+    func testCleanRealm() {
         viewModel.fetchData(str: "str")
         viewModel.cleanRealm()
         
-        let objects = viewModel.realmService.get(GameRealm.self)
+        let objects = viewModel.realmService?.get(GameRealm.self)
         
         XCTAssertEqual(objects, nil)
     }
     
-    func testFetchRealm(){
+    func testFetchRealm() {
         viewModel.fetchData(str: "str")
         viewModel.searchedGameApi = nil
         
         viewModel.fetchFromRealm()
         
-        let objects = viewModel.realmService.get(GameRealm.self)
+        let objects = viewModel.realmService?.get(GameRealm.self)
         
         XCTAssertEqual(objects?.count, 10)
     }

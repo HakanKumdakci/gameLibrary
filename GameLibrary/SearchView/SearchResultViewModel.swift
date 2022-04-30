@@ -19,21 +19,18 @@ class SearchResultViewModel: NSObject {
     var searchedGameApi: GameApi?
     weak var delegate: SearchResultViewModelDelegate?
     
-    var service: NetworkingServiceProtocol!
-    var realmService: RealmServiceProtocol!
-    var dispatchQueue: DispatchQueueType!
+    var realmService: RealmServiceProtocol?
+    var dispatchQueue: DispatchQueueType?
     
     var gameProvider = MoyaProvider<MoyaService>()
     
-    init(service: NetworkingServiceProtocol,
-         realmService: RealmServiceProtocol = RealmService.shared,
+    init(realmService: RealmServiceProtocol = RealmService.shared,
          dispatchQueue: DispatchQueueType = DispatchQueue.main) {
-        self.service = service
         self.realmService = realmService
         self.dispatchQueue = dispatchQueue
     }
     
-    func fetchData(str: String, optionalURL:  String = ""){
+    func fetchData(str: String, optionalURL:  String = "") {
                 
         self.searchText = str
         
@@ -44,8 +41,8 @@ class SearchResultViewModel: NSObject {
                     do{
                         let object = try JSONDecoder().decode(GameApi.self, from: response.data)
                         strongSelf.searchedGameApi = object
-                        strongSelf.delegate!.didSearchComplete()
-                        strongSelf.dispatchQueue.async {
+                        strongSelf.delegate?.didSearchComplete()
+                        strongSelf.dispatchQueue?.async {
                             strongSelf.cleanRealm()
                             strongSelf.saveToRealm()
                         }
@@ -59,8 +56,8 @@ class SearchResultViewModel: NSObject {
     }
     
     
-    func saveToRealm(){
-        for i in 0..<(searchedGameApi?.results.count ?? 0){
+    func saveToRealm() {
+        for i in 0..<(searchedGameApi?.results.count ?? 0) {
             guard let obj = searchedGameApi?.results[i] else{ return }
             do{
                 let jsonData = try obj.jsonData()
@@ -74,7 +71,7 @@ class SearchResultViewModel: NSObject {
                 dictionary["key"] = searchText
                 dictionary["genres"] = obj.genres.map{ $0.name }
                 
-                realmService.create(GameRealm(value: dictionary))
+                realmService?.create(GameRealm(value: dictionary))
             }catch{
                 print("Function: \(#function), line: \(#line)")
             }
@@ -83,14 +80,14 @@ class SearchResultViewModel: NSObject {
         UserDefaults.standard.set(searchText, forKey: "key")
     }
     
-    func cleanRealm(){
-        guard let objects = realmService.get(GameRealm.self) else{return }
-        objects.forEach( {realmService.delete($0) })
+    func cleanRealm() {
+        guard let objects = realmService?.get(GameRealm.self) else{return }
+        objects.forEach( {realmService?.delete($0) })
     }
     
     // önceden kaydedilmiş oyunları çekiyor
-    func fetchFromRealm(){
-        guard let objects = realmService.get(GameRealm.self) else{return }
+    func fetchFromRealm() {
+        guard let objects = realmService?.get(GameRealm.self) else{return }
         var games: [Game] = []
         let sameKey = objects.filter("key = '\(searchText)'")
         

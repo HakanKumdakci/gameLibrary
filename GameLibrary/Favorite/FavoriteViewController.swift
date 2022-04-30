@@ -10,7 +10,7 @@ import UIKit
 class FavoriteViewController: UIViewController {
     
     
-    public var viewModel: FavoriteViewModel!
+    public var viewModel: FavoriteViewModel?
     
     private var errorLabel: UILabel! = {
         var lbl = UILabel(frame: .zero)
@@ -36,8 +36,8 @@ class FavoriteViewController: UIViewController {
         errorLabel.isHidden = true
         guard let us = UserDefaults.standard.array(forKey: "fav") else{ return }
         
-        if viewModel.favoriteGames.count != us.count{
-            viewModel.fetchData()
+        if viewModel?.favoriteGames.count != us.count{
+            viewModel?.fetchData()
             return
         }else{
             if us.isEmpty{
@@ -68,7 +68,7 @@ class FavoriteViewController: UIViewController {
         // Do any additional setup after loading the view.
     }
     
-    private func checkTitle(){
+    private func checkTitle() {
         guard let us = UserDefaults.standard.array(forKey: "fav") else{ return }
         if us.count != 0 {
             title = "Favorites(\(us.count))"
@@ -93,16 +93,17 @@ class FavoriteViewController: UIViewController {
         gameTableView.bottomToSuperview(offset: 0, usingSafeArea: true)
     }
     
-    private func showAlert(title: String, message: String, indexPath: IndexPath){
+    private func showAlert(title: String, message: String, indexPath: IndexPath) {
         let sheet = UIAlertController(title: title, message: message, preferredStyle: .alert)
         sheet.addAction(UIAlertAction(title: "Cancel", style: .destructive, handler: { action in
         }))
         sheet.addAction(UIAlertAction(title: "Confirm", style: .cancel, handler: { action in
             guard var favorites = UserDefaults.standard.array(forKey: "fav") as? [String],
-                  let firstIndex = favorites.firstIndex(of: "\(self.viewModel.favoriteGames[indexPath.row])") else{return }
+                  let model = self.viewModel?.favoriteGames[indexPath.row],
+                  let firstIndex = favorites.firstIndex(of: "\(model)") else {return }
             favorites.remove(at:  firstIndex)
             UserDefaults.standard.set(favorites, forKey: "fav")
-            self.viewModel.favoriteGames.remove(at: indexPath.row)
+            self.viewModel?.favoriteGames.remove(at: indexPath.row)
             self.gameTableView.reloadData()
             self.checkTitle()
         }))
@@ -111,12 +112,12 @@ class FavoriteViewController: UIViewController {
     
 }
 
-extension FavoriteViewController: UITableViewDelegate, UITableViewDataSource{
+extension FavoriteViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         gameTableView.deselectRow(at: indexPath, animated: true)
         
         let vc = GameDetailViewController()
-        vc.viewModel = GameDetailViewModel(service: NetworkingService())
+        vc.viewModel = GameDetailViewModel()
         vc.viewModel.game = viewModel?.favoriteGames[indexPath.row]
         
         self.navigationController?.pushViewController(vc, animated: true)
@@ -124,12 +125,13 @@ extension FavoriteViewController: UITableViewDelegate, UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "GameTableViewCell", for: indexPath) as! GameTableViewCell
-        cell.configure(with: viewModel.favoriteGames[indexPath.row])
+        guard let model = viewModel?.favoriteGames[indexPath.row] else {return cell }
+        cell.configure(with: model)
         return cell
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.favoriteGames.count
+        return viewModel?.favoriteGames.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -147,7 +149,7 @@ extension FavoriteViewController: FavoriteViewModelDelegate{
     func didFetchCompleted() {
         DispatchQueue.main.async {
             self.gameTableView.reloadData()
-            if self.viewModel.favoriteGames.isEmpty{
+            if (self.viewModel?.favoriteGames.isEmpty) ?? false{
                 self.errorLabel.isHidden = false
                 self.gameTableView.isHidden = true
             }

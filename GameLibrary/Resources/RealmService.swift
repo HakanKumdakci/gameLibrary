@@ -14,7 +14,7 @@ class RealmService: RealmServiceProtocol{
     static let shared = RealmService()
     var realm: Realm?
     
-    init(realm: Realm){
+    init(realm: Realm) {
         self.realm = realm
     }
     

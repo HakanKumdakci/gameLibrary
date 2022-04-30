@@ -22,7 +22,7 @@ class TabBarViewController: UITabBarController {
         // Do any additional setup after loading the view.
     }
     
-    func setUpViewControllers(){
+    func setUpViewControllers() {
         let gamesVC = GamesViewController()
         let games = UINavigationController(rootViewController: gamesVC)
         games.tabBarItem = setUpTabBarItem(name: "Games", imageName: "game-console")

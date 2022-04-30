@@ -12,16 +12,12 @@ import Moya
 class GamesViewModel: NSObject {
     
     var gameApi: GameApi?
-        
-    var service: NetworkingServiceProtocol!
+    
     
     var gameProvider = MoyaProvider<MoyaService>()
     
-    init(service: NetworkingServiceProtocol) {
-        self.service = service
-    }
     
-    func fetchData(optionalURL: String = "", completion: @escaping (Bool) -> Void){
+    func fetchData(optionalURL: String = "", completion: @escaping (Bool) -> Void) {
         
         gameProvider.request(.getMain(optionalUrl: optionalURL)) { [weak self] result in
             switch result{
@@ -42,18 +38,18 @@ class GamesViewModel: NSObject {
         }
     }
     
-    func tappedOnPrevious(completion: @escaping (Bool) -> Void){
+    func tappedOnPrevious(completion: @escaping (Bool) -> Void) {
         fetchData(optionalURL: "\(gameApi?.previous ?? "")", completion: completion)
     }
     
-    func tappedOnNext(completion: @escaping (Bool) -> Void){
+    func tappedOnNext(completion: @escaping (Bool) -> Void) {
         fetchData(optionalURL: "\(gameApi?.next ?? "")", completion: completion)
     }
     
     
-    func refreshTappedList(indexPath: IndexPath){
+    func refreshTappedList(indexPath: IndexPath) {
         var us = UserDefaults.standard.array(forKey: "tapped") as! [String]
-        if us.contains("\(gameApi?.results[indexPath.row].id ?? 0)"){
+        if us.contains("\(gameApi?.results[indexPath.row].id ?? 0)") {
         }else{
             us.append("\(gameApi?.results[indexPath.row].id ?? 0)")
             UserDefaults.standard.set(us, forKey: "tapped")

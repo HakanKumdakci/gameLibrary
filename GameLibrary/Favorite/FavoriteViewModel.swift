@@ -27,7 +27,7 @@ class FavoriteViewModel: NSObject {
         self.service = service
     }
     
-    func fetchData(){
+    func fetchData() {
         self.favoriteGames = []
         
         guard let favoriteGameIds = UserDefaults.standard.array(forKey: "fav") else{return }
@@ -58,7 +58,7 @@ class FavoriteViewModel: NSObject {
             }
         }
         
-        myGroup.notify(queue: .main){
+        myGroup.notify(queue: .main) {
             self.delegate?.didFetchCompleted()
         }
     }

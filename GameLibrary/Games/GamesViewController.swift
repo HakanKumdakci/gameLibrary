@@ -15,9 +15,9 @@ class GamesViewController: UIViewController, UISearchControllerDelegate, UISearc
         
         UserDefaults.standard.set(true, forKey: "searched")
         
-        if let searchKey = UserDefaults.standard.string(forKey: "key"){
+        if let searchKey = UserDefaults.standard.string(forKey: "key") {
             if searchKey == text{
-                searchResultViewModel.fetchFromRealm()
+                searchResultViewModel?.fetchFromRealm()
                 errorLabel.isHidden = true
                 return
             }
@@ -26,7 +26,7 @@ class GamesViewController: UIViewController, UISearchControllerDelegate, UISearc
             UserDefaults.standard.set(nil, forKey: "key")
             return
         }
-        searchResultViewModel.fetchData(str: text)
+        searchResultViewModel?.fetchData(str: text)
         errorLabel.isHidden = true
     }
     
@@ -34,7 +34,7 @@ class GamesViewController: UIViewController, UISearchControllerDelegate, UISearc
         guard let text = searchController.searchBar.text else {return }
         
         //fetch latest search screen
-        if let searchKey = UserDefaults.standard.string(forKey: "key"){
+        if let searchKey = UserDefaults.standard.string(forKey: "key") {
             if searchKey != ""{
                 if text == ""{
                     searchController.searchBar.text = searchKey
@@ -54,8 +54,8 @@ class GamesViewController: UIViewController, UISearchControllerDelegate, UISearc
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         
         if (searchBar.text == "") {
-            searchResultViewModel.searchedGameApi = nil
-            searchResultViewController.gameCollectionView.reloadData()
+            searchResultViewModel?.searchedGameApi = nil
+            searchResultViewController?.gameCollectionView.reloadData()
             UserDefaults.standard.set(nil, forKey: "key")
         }else{
             errorLabel.isHidden = true
@@ -71,10 +71,10 @@ class GamesViewController: UIViewController, UISearchControllerDelegate, UISearc
         UserDefaults.standard.set(false, forKey: "searched")
     }
     
-    private var viewModel: GamesViewModel!
+    private var viewModel: GamesViewModel?
     
-    var searchResultViewController : SearchResultViewController!
-    var searchResultViewModel: SearchResultViewModel!
+    var searchResultViewController : SearchResultViewController?
+    var searchResultViewModel: SearchResultViewModel?
     
     private var errorLabel: UILabel! = {
         var lbl = UILabel(frame: .zero)
@@ -138,8 +138,8 @@ class GamesViewController: UIViewController, UISearchControllerDelegate, UISearc
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if viewModel.gameApi == nil {
-            viewModel.fetchData { [weak self] result in
+        if viewModel?.gameApi == nil {
+            viewModel?.fetchData { [weak self] result in
                 guard let self = self else{return }
                 DispatchQueue.main.async {
                     self.receivedData()
@@ -166,15 +166,15 @@ class GamesViewController: UIViewController, UISearchControllerDelegate, UISearc
         self.navigationController?.navigationBar.prefersLargeTitles = true
         
         UserDefaults.standard.set([], forKey: "tapped")
-        searchResultViewModel = SearchResultViewModel(service: NetworkingService())
+        searchResultViewModel = SearchResultViewModel()
         
         
         searchResultViewController = SearchResultViewController()
-        searchResultViewController.delegate = self
-        searchResultViewController.viewModel = searchResultViewModel
-        searchResultViewModel.delegate = searchResultViewController
+        searchResultViewController?.delegate = self
+        searchResultViewController?.viewModel = searchResultViewModel
+        searchResultViewModel?.delegate = searchResultViewController
         
-        viewModel = GamesViewModel(service: NetworkingService())
+        viewModel = GamesViewModel()
         
         navigationItem.searchController = searchController
         view.addSubview(gameCollectionView)
@@ -241,7 +241,7 @@ extension GamesViewController: UICollectionViewDelegateFlowLayout, UICollectionV
         }
         
         //prepare viewModel of view
-        var gameDetailViewModel = GameDetailViewModel(service: NetworkingService())
+        var gameDetailViewModel = GameDetailViewModel()
         gameDetailViewModel.game = viewModel?.gameApi?.results[indexPath.row]
         
         //prepare view to push
@@ -250,12 +250,12 @@ extension GamesViewController: UICollectionViewDelegateFlowLayout, UICollectionV
         gameDetailViewModel.delegate = vc
         
         //make gray when pressed on game cell
-        viewModel.refreshTappedList(indexPath: indexPath)
+        viewModel?.refreshTappedList(indexPath: indexPath)
         self.navigationController?.pushViewController(vc, animated: true)
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if viewModel.gameApi?.results.count == indexPath.row {
+        if viewModel?.gameApi?.results.count == indexPath.row {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
             cell.addSubview(prevButton)
             cell.addSubview(nextButton)
@@ -273,18 +273,18 @@ extension GamesViewController: UICollectionViewDelegateFlowLayout, UICollectionV
         }
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "GameCollectionViewCell", for: indexPath) as! GameCollectionViewCell
-        guard let model = (viewModel.gameApi?.results[indexPath.row]) else {return cell }
+        guard let model = (viewModel?.gameApi?.results[indexPath.row]) else {return cell }
         cell.configure(with: model)
         
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return (viewModel.gameApi?.results.count ?? -1) + 1
+        return (viewModel?.gameApi?.results.count ?? -1) + 1
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let height = indexPath.row == viewModel.gameApi?.results.count ? 40.0 : 100.0
+        let height = indexPath.row == viewModel?.gameApi?.results.count ? 40.0 : 100.0
         if UIDevice.current.orientation.isLandscape {
             return CGSize(width: self.view.frame.width/2.1, height: height)
         } else {

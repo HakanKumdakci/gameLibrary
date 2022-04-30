@@ -7,14 +7,15 @@
 
 import XCTest
 @testable import GameLibrary
+import Moya
 
 class GameDetailTest: XCTestCase {
     
     var viewModel: GameDetailViewModel!
-    var service: MockService!
+    var service: MoyaProvider<MoyaService>!
 
     override func setUpWithError() throws {
-        service = MockService()
+        service = MoyaProvider<MoyaService>(stubClosure: MoyaProvider.immediatelyStub)
         viewModel = GameDetailViewModel(service: service)
     }
 

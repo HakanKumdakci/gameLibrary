@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol NetworkingServiceProtocol: AnyObject{
+protocol NetworkingServiceProtocol: AnyObject {
     
     func getData<T: Codable>(_ t: T.Type, url: String, completion: @escaping(T) -> Void)
 }
@@ -15,7 +15,7 @@ protocol NetworkingServiceProtocol: AnyObject{
 class NetworkingService: NSObject, NetworkingServiceProtocol {
     
     
-    func getData<T: Codable>(_ t: T.Type, url: String, completion: @escaping(T) -> Void){
+    func getData<T: Codable>(_ t: T.Type, url: String, completion: @escaping(T) -> Void) {
         
         guard let urlString = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else{return }
         guard let url = URL(string: urlString) else{return}
