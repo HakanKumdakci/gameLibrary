@@ -28,8 +28,6 @@ class SearchResultViewModel: NSObject {
          dispatchQueue: DispatchQueueType = DispatchQueue.main) {
         self.realmService = realmService
         self.dispatchQueue = dispatchQueue
-        
-        print(Realm.Configuration.defaultConfiguration.fileURL!)
     }
     
     func fetchData(str: String, optionalURL:  String = "") {

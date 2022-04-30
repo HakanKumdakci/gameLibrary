@@ -111,7 +111,6 @@ class GameTableViewCell: UITableViewCell {
         //check the url and get image
         if let imgUrl = model.background_image,
            let url = URL(string: imgUrl) {
-            
             let transition = SDWebImageTransition.fade
             transition.prepares = { (view, image, imageData, cacheType, imageURL) in
                 view.transform = .init(rotationAngle: .pi)
@@ -121,7 +120,7 @@ class GameTableViewCell: UITableViewCell {
             }
             self.imageOfGame.sd_imageTransition = transition
             
-            self.imageOfGame.sd_setImage(with: url)
+            self.imageOfGame.sd_setImage(with: url, placeholderImage: nil, options: [.progressiveLoad])
         }
         guard let font = UIFont(name: "Avenir-Roman", size: 18.0) else{
             self.metaCritic.text = "metacritic: \(model.metacritic ?? 0)"

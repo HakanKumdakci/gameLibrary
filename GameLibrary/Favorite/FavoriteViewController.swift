@@ -59,7 +59,7 @@ class FavoriteViewController: UIViewController {
         checkTitle()
         
 
-        viewModel = FavoriteViewModel(service: NetworkingService())
+        viewModel = FavoriteViewModel()
         viewModel?.delegate = self
         view.addSubview(gameTableView)
         view.addSubview(errorLabel)

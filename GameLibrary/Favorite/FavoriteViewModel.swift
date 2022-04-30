@@ -18,14 +18,9 @@ class FavoriteViewModel: NSObject {
     public var favoriteGames: [Game] = []
     
     weak var delegate: FavoriteViewModelDelegate?
+        
+    public var gameProvider = MoyaProvider<MoyaService>()
     
-    private var service: NetworkingServiceProtocol!
-    
-    var gameProvider = MoyaProvider<MoyaService>()
-    
-    init(service: NetworkingServiceProtocol) {
-        self.service = service
-    }
     
     func fetchData() {
         self.favoriteGames = []

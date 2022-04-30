@@ -8,6 +8,7 @@
 import UIKit
 import SafariServices
 import TinyConstraints
+import SDWebImage
 
 class GameDetailViewController: UIViewController {
     
@@ -261,6 +262,12 @@ extension GameDetailViewController: GameDetailViewModelDelegate{
             
             self.imageOfGame.backgroundColor = UIColor(hex: "000000", alpha: 0.8)
             guard let url = URL(string: "\(self.viewModel.gameDetail.background_image)") else {return }
+            let transition = SDWebImageTransition.fade
+            
+            transition.animations = { (view, image) in
+                view.transform = .identity
+            }
+            self.imageOfGame.sd_imageTransition = transition
             self.imageOfGame.sd_setImage(with: url, placeholderImage: nil, options: [.progressiveLoad])
             
         }

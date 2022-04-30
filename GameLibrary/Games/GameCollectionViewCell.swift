@@ -112,6 +112,12 @@ class GameCollectionViewCell: UICollectionViewCell {
         if let imgUrl = model.background_image,
            let url = URL(string: imgUrl) {
             if imgUrl != ""{
+                let transition = SDWebImageTransition.fade
+                
+                transition.animations = { (view, image) in
+                    view.transform = .identity
+                }
+                self.imageOfGame.sd_imageTransition = transition
                 self.imageOfGame.sd_setImage(with: url, placeholderImage: nil, options: [.progressiveLoad])
             }
             

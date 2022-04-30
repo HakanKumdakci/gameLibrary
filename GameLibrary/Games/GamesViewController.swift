@@ -244,7 +244,7 @@ extension GamesViewController: UICollectionViewDelegateFlowLayout, UICollectionV
         }
         
         //prepare viewModel of view
-        var gameDetailViewModel = GameDetailViewModel()
+        let gameDetailViewModel = GameDetailViewModel()
         gameDetailViewModel.game = viewModel?.gameApi?.results[indexPath.row]
         
         //prepare view to push

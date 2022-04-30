@@ -28,7 +28,7 @@ class SearchResultViewController: UIViewController {
         return collectionView
     }()
     
-    var errorLabel: UILabel! = {
+    private var errorLabel: UILabel! = {
         var lbl = UILabel(frame: .zero)
         lbl.text = "No game has been searched."
         lbl.textAlignment = .center
@@ -37,7 +37,7 @@ class SearchResultViewController: UIViewController {
         return lbl
     }()
     
-    lazy var nextButton: UIButton = {
+    private lazy var nextButton: UIButton = {
         var btn = UIButton(type: .system)
         btn.setTitle("Next", for: .normal)
         btn.backgroundColor = .clear
@@ -49,7 +49,7 @@ class SearchResultViewController: UIViewController {
         return btn
     }()
     
-    lazy var prevButton: UIButton = {
+    private lazy var prevButton: UIButton = {
         var btn = UIButton(type: .system)
         btn.setTitle("Previous", for: .normal)
         btn.backgroundColor = .clear
