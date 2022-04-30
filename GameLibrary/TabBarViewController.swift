@@ -12,44 +12,41 @@ class TabBarViewController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let gamesVC = GamesViewController()
-        let favoriteVC = FavoriteViewController()
+        setUpViewControllers()
         
-        let games = UINavigationController(rootViewController: gamesVC)
-        let favorite = UINavigationController(rootViewController: favoriteVC)
+        self.tabBar.backgroundColor = UIColor.clear
         
-        
-        
-        let item1 = gamesVC
-        let imgConsole = Helper.shared.resizeImage(image: UIImage(named: "game-console")!.withRenderingMode(.alwaysOriginal), targetSize: CGSize(width: 42, height: 32))
-        var icon1: UITabBarItem!
-        if #available(iOS 13.0, *) {
-            icon1 = UITabBarItem(title: "Games", image: imgConsole, selectedImage: imgConsole.withTintColor(.gray, renderingMode: .alwaysOriginal))
-        } else {
-            icon1 = UITabBarItem(title: "Games", image: imgConsole, selectedImage: imgConsole)
-        }
-        games.tabBarItem = icon1
-        item1.title = "Games"
-        
-        
-        
-        let item2 = favoriteVC
-        let imgFavorite = Helper.shared.resizeImage(image: UIImage(named: "star")!.withRenderingMode(.alwaysOriginal), targetSize: CGSize(width: 42, height: 32))
-        var icon2: UITabBarItem!
-        if #available(iOS 13.0, *) {
-            icon2 = UITabBarItem(title: "Favorites", image: imgFavorite, selectedImage: imgFavorite.withTintColor(.gray, renderingMode: .alwaysOriginal))
-        } else {
-            icon2 = UITabBarItem(title: "Favorites", image: imgFavorite, selectedImage: imgFavorite)
-        }
-        favorite.tabBarItem = icon2
-        item2.title = "Favorites"
-        
-        
-        self.viewControllers = [games, favorite]
+        let frost = UIVisualEffectView(effect: UIBlurEffect(style: .light))
+        frost.frame = self.tabBar.bounds
+        self.tabBar.insertSubview(frost, at: 0)
         // Do any additional setup after loading the view.
     }
     
-
+    func setUpViewControllers(){
+        let gamesVC = GamesViewController()
+        let games = UINavigationController(rootViewController: gamesVC)
+        games.tabBarItem = setUpTabBarItem(name: "Games", imageName: "game-console")
+        
+        let favoriteVC = FavoriteViewController()
+        let favorite = UINavigationController(rootViewController: favoriteVC)
+        favorite.tabBarItem = setUpTabBarItem(name: "Favorites", imageName: "star")
+        
+        self.viewControllers = [games, favorite]
+    }
     
-
+    func setUpTabBarItem(name: String, imageName: String) -> UITabBarItem{
+        guard let image = UIImage(named: imageName),
+              let img = UIImage(image: image.withRenderingMode(.alwaysOriginal), targetSize: CGSize(width: 42, height: 32))
+        else{
+            return UITabBarItem(title: name, image: nil, tag: 0)
+        }
+        
+        var tabBarItem: UITabBarItem!
+        if #available(iOS 13.0, *) {
+            tabBarItem = UITabBarItem(title: name, image: img, selectedImage: img.withTintColor(.gray, renderingMode: .alwaysOriginal))
+        }else {
+            tabBarItem = UITabBarItem(title: name, image: img, selectedImage: img)
+        }
+        return tabBarItem
+    }
 }

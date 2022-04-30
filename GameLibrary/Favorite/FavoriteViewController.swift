@@ -10,9 +10,9 @@ import UIKit
 class FavoriteViewController: UIViewController {
     
     
-    var viewModel: FavoriteViewModel!
+    public var viewModel: FavoriteViewModel!
     
-    var errorLabel: UILabel! = {
+    private var errorLabel: UILabel! = {
         var lbl = UILabel(frame: .zero)
         lbl.text = "There is no favorites found."
         lbl.textAlignment = .center
@@ -21,7 +21,7 @@ class FavoriteViewController: UIViewController {
         return lbl
     }()
     
-    lazy var gameTableView: UITableView! = {
+    private lazy var gameTableView: UITableView! = {
         var table = UITableView(frame: .zero)
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         table.register(GameTableViewCell.self, forCellReuseIdentifier: "GameTableViewCell")
@@ -40,7 +40,7 @@ class FavoriteViewController: UIViewController {
             viewModel.fetchData()
             return
         }else{
-            if us.count == 0{
+            if us.isEmpty{
                 errorLabel.isHidden = false
             }
         }
@@ -59,7 +59,7 @@ class FavoriteViewController: UIViewController {
         checkTitle()
         
 
-        viewModel = FavoriteViewModel(service: NetworkingService.shared)
+        viewModel = FavoriteViewModel(service: NetworkingService())
         viewModel?.delegate = self
         view.addSubview(gameTableView)
         view.addSubview(errorLabel)
@@ -68,7 +68,7 @@ class FavoriteViewController: UIViewController {
         // Do any additional setup after loading the view.
     }
     
-    func checkTitle(){
+    private func checkTitle(){
         guard let us = UserDefaults.standard.array(forKey: "fav") else{ return }
         if us.count != 0 {
             title = "Favorites(\(us.count))"
@@ -91,18 +91,17 @@ class FavoriteViewController: UIViewController {
         gameTableView.leadingToSuperview(offset: 0)
         gameTableView.trailingToSuperview(offset: 0)
         gameTableView.bottomToSuperview(offset: 0, usingSafeArea: true)
-        
     }
     
-    func showAlert(title: String, message: String, indexPath: IndexPath){
+    private func showAlert(title: String, message: String, indexPath: IndexPath){
         let sheet = UIAlertController(title: title, message: message, preferredStyle: .alert)
         sheet.addAction(UIAlertAction(title: "Cancel", style: .destructive, handler: { action in
-            print("aawdaw")
         }))
         sheet.addAction(UIAlertAction(title: "Confirm", style: .cancel, handler: { action in
-            var us = UserDefaults.standard.array(forKey: "fav") as! [String]
-            us.remove(at: us.firstIndex(of: "\(self.viewModel.favoriteGames[indexPath.row])") ?? 0)
-            UserDefaults.standard.set(us, forKey: "fav")
+            guard var favorites = UserDefaults.standard.array(forKey: "fav") as? [String],
+                  let firstIndex = favorites.firstIndex(of: "\(self.viewModel.favoriteGames[indexPath.row])") else{return }
+            favorites.remove(at:  firstIndex)
+            UserDefaults.standard.set(favorites, forKey: "fav")
             self.viewModel.favoriteGames.remove(at: indexPath.row)
             self.gameTableView.reloadData()
             self.checkTitle()
@@ -117,7 +116,7 @@ extension FavoriteViewController: UITableViewDelegate, UITableViewDataSource{
         gameTableView.deselectRow(at: indexPath, animated: true)
         
         let vc = GameDetailViewController()
-        vc.viewModel = GameDetailViewModel(service: NetworkingService.shared)
+        vc.viewModel = GameDetailViewModel(service: NetworkingService())
         vc.viewModel.game = viewModel?.favoriteGames[indexPath.row]
         
         self.navigationController?.pushViewController(vc, animated: true)
@@ -140,9 +139,6 @@ extension FavoriteViewController: UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete{
             self.showAlert(title: "Do you confirm?", message: "This game will be removed from your favorites.", indexPath: indexPath)
-            
-            
-            
         }
     }
 }
@@ -151,7 +147,7 @@ extension FavoriteViewController: FavoriteViewModelDelegate{
     func didFetchCompleted() {
         DispatchQueue.main.async {
             self.gameTableView.reloadData()
-            if self.viewModel.favoriteGames.count == 0{
+            if self.viewModel.favoriteGames.isEmpty{
                 self.errorLabel.isHidden = false
                 self.gameTableView.isHidden = true
             }

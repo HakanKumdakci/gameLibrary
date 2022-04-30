@@ -6,45 +6,55 @@
 //
 
 import UIKit
+import Moya
 
-protocol FavoriteViewModelDelegate: AnyObject{
+
+protocol FavoriteViewModelDelegate: AnyObject {
     func didFetchCompleted()
 }
 
 class FavoriteViewModel: NSObject {
     
-    var favoriteGames: [Game] = []
+    public var favoriteGames: [Game] = []
     
     weak var delegate: FavoriteViewModelDelegate?
     
-    var service: NetworkingServiceProtocol!
+    private var service: NetworkingServiceProtocol!
+    
+    var gameProvider = MoyaProvider<MoyaService>()
     
     init(service: NetworkingServiceProtocol) {
         self.service = service
-        
     }
     
     func fetchData(){
-        guard let key = Bundle.main.object(forInfoDictionaryKey: "privateKey") as? String else{ return }
-        guard let api = Bundle.main.object(forInfoDictionaryKey: "gameDetail") as? String else{ return }
-        
         self.favoriteGames = []
         
         guard let favoriteGameIds = UserDefaults.standard.array(forKey: "fav") else{return }
         
-        if favoriteGameIds.count == 0{
+        if favoriteGameIds.isEmpty{
             self.delegate?.didFetchCompleted()
             return
         }
         
-        
         let myGroup = DispatchGroup()
         for id in favoriteGameIds {
             myGroup.enter()
-            service.getData(Game.self, url: "\(api)\(id)?key=\(key)") { [weak self] result in
-                guard let strongSelf = self else {return }
-                strongSelf.favoriteGames.append(result)
-                myGroup.leave()
+            gameProvider.request(.getDetail(id: "\(id)")) { [weak self] result in
+                switch result {
+                    case .success(let response):
+                        do{
+                            let object = try JSONDecoder().decode(Game.self, from: response.data)
+                            guard let strongSelf = self else {return }
+                            strongSelf.favoriteGames.append(object)
+                            myGroup.leave()
+                        }catch{
+                            print("Function: \(#function), line: \(#line)")
+                            myGroup.leave()
+                        }
+                    case .failure(let error):
+                        print(error)
+                }
             }
         }
         

@@ -13,6 +13,6 @@ baseUrl = https:/$()/api.rawg.io/api/games?page_size=10&page=1&key=3be8af6ebf124
 privateKey = 3be8af6ebf124ffe81d90f514e59856c
 
 
-gameDetail = https:/$()/api.rawg.io/api/games/
+gameDetail = https:/$()/api.rawg.io/api/games
 
 gameSearch = https:/$()/api.rawg.io/api/games?page_size=10&page=1&search=

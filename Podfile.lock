@@ -1,4 +1,9 @@
 PODS:
+  - Alamofire (5.6.1)
+  - Moya (15.0.0):
+    - Moya/Core (= 15.0.0)
+  - Moya/Core (15.0.0):
+    - Alamofire (~> 5.0)
   - Realm (10.15.1):
     - Realm/Headers (= 10.15.1)
   - Realm/Headers (10.15.1)
@@ -10,23 +15,28 @@ PODS:
   - TinyConstraints (4.0.2)
 
 DEPENDENCIES:
+  - Moya (~> 15.0)
   - RealmSwift
   - SDWebImage
   - TinyConstraints
 
 SPEC REPOS:
   trunk:
+    - Alamofire
+    - Moya
     - Realm
     - RealmSwift
     - SDWebImage
     - TinyConstraints
 
 SPEC CHECKSUMS:
+  Alamofire: 87bd8c952f9a4454320fce00d9cc3de57bcadaf5
+  Moya: 138f0573e53411fb3dc17016add0b748dfbd78ee
   Realm: fbcbde2620d51623cc5b18e28f5b165c39abef52
   RealmSwift: e4bea8e42efad3d543aea23b56504069c6faaea2
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   TinyConstraints: 7b7ccc0c485bb3bb47082138ff28bc33cd49897f
 
-PODFILE CHECKSUM: db86e86c25a9405b2e5a1921280b895caad026e9
+PODFILE CHECKSUM: 14a65d65b4b3572cd30cef6cc249171da173cbcc
 
 COCOAPODS: 1.11.2

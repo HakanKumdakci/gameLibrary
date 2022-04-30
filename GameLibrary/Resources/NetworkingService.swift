@@ -13,13 +13,12 @@ protocol NetworkingServiceProtocol: AnyObject{
 }
 
 class NetworkingService: NSObject, NetworkingServiceProtocol {
-    static let shared = NetworkingService()
     
     
     func getData<T: Codable>(_ t: T.Type, url: String, completion: @escaping(T) -> Void){
         
-        
-        let url = URL(string: url)!
+        guard let urlString = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else{return }
+        guard let url = URL(string: urlString) else{return}
         
         var urlRequest = URLRequest(url: url)
         

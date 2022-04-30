@@ -14,19 +14,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // Override point for customization after application launch.
+        
+        let window = UIWindow()
+        window.rootViewController = TabBarViewController()
+        window.makeKeyAndVisible()
         
         if #available(iOS 13.0, *) {
-            window?.overrideUserInterfaceStyle = .light
+            window.overrideUserInterfaceStyle = .light
         }
-        // Override point for customization after application launch.
-        self.window = UIWindow()
-        self.window!.rootViewController = TabBarViewController()
-        self.window!.makeKeyAndVisible()
+        
+        self.window = window
+        
         return true
     }
-
-    
-
-
 }
 

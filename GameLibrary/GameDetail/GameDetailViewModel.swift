@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import Moya
+
 
 protocol GameDetailViewModelDelegate: AnyObject{
     func didFetchCompleted()
@@ -18,18 +20,24 @@ class GameDetailViewModel: NSObject {
     var gameDetail: GameDetail!
     var service: NetworkingServiceProtocol!
     
+    var gameProvider = MoyaProvider<MoyaService>()
+    
     init(service: NetworkingServiceProtocol) {
         self.service = service
     }
     
     func fetchData(){
-        guard let key = Bundle.main.object(forInfoDictionaryKey: "privateKey") as? String else{ return }
-        guard let api = Bundle.main.object(forInfoDictionaryKey: "gameDetail") as? String else{ return }
         
-        service.getData(GameDetail.self, url: "\(api)\(game.id)?key=\(key)") { [weak self] result in
-            guard let strongSelf = self else {return }
-            strongSelf.gameDetail = result
-            strongSelf.delegate?.didFetchCompleted()
+        gameProvider.request(.getDetail(id: "\(game.id)")) { [weak self] result in
+            switch result{
+                case .success(let response):
+                    let object = try! JSONDecoder().decode(GameDetail.self, from: response.data)
+                    guard let strongSelf = self else {return }
+                    strongSelf.gameDetail = object
+                    strongSelf.delegate?.didFetchCompleted()
+                case .failure(let error):
+                    print(error)
+            }
         }
     }
 }

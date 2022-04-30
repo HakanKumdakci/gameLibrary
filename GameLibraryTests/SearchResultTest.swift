@@ -28,8 +28,8 @@ class SearchResultTest: XCTestCase {
         networkingService = nil
         dispatch = nil
         
-        try! realmService.realm.write{
-            realmService.realm.deleteAll()
+        try! realmService.realm?.write{
+            realmService.realm?.deleteAll()
         }
         realmService = nil
         viewModel = nil

@@ -9,6 +9,7 @@ target 'GameLibrary' do
 pod 'TinyConstraints'
 pod 'SDWebImage'
 pod 'RealmSwift'
+pod 'Moya', '~> 15.0'
 
   target 'GameLibraryTests' do
     inherit! :search_paths

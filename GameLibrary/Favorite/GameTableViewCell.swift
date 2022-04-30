@@ -6,23 +6,26 @@
 //
 
 import UIKit
+import SwiftUI
+import SDWebImage
 
 class GameTableViewCell: UITableViewCell {
     
-    var model: Game?
+    private var model: Game?
     
     static let identifier = "GameTableViewCell"
     
-    let imageOfGame: UIImageView = {
+    private let imageOfGame: UIImageView = {
         let imageView = UIImageView(frame: .zero)
         imageView.layer.cornerRadius = 0
         imageView.backgroundColor = .white
         imageView.layer.masksToBounds = false
-        imageView.contentMode = .center
+        imageView.contentMode = .scaleToFill
+        imageView.backgroundColor = UIColor(hex: "000000", alpha: 0.8)
         return imageView
     }()
     
-    var nameOfGame: UILabel = {
+    private var nameOfGame: UILabel = {
         let label = UILabel(frame: .zero)
         label.font = UIFont(name: "Avenir-Roman", size: 18)
         label.textColor = .black
@@ -31,8 +34,7 @@ class GameTableViewCell: UITableViewCell {
         return label
     }()
     
-    
-    var metaCritic: UILabel = {
+    private var metaCritic: UILabel = {
         let label = UILabel(frame: .zero)
         label.font = UIFont(name: "Avenir-Roman", size: 16)
         label.textColor = .black
@@ -40,7 +42,7 @@ class GameTableViewCell: UITableViewCell {
         return label
     }()
     
-    var genre: UILabel = {
+    private var genre: UILabel = {
         let label = UILabel(frame: .zero)
         label.font = UIFont(name: "Avenir-Roman", size: 16)
         label.textColor = .black
@@ -60,7 +62,6 @@ class GameTableViewCell: UITableViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
     
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -87,33 +88,50 @@ class GameTableViewCell: UITableViewCell {
         metaCritic.leadingToTrailing(of: imageOfGame, offset: 12)
         metaCritic.trailingToSuperview()
         metaCritic.height(18)
-        
-        self.imageOfGame.backgroundColor = Helper.shared.hexStringToUIColor(hex: "000000", alpha: 0.8)
     }
     
     
-    public func configure(with model: Game){
+    public func configure(with model: Game) {
+        
         self.model = model
         nameOfGame.text = model.name
         
         // check genres and place them to string
         if model.genres.count > 0{
-            genre.text = ""
-            for i in 0..<model.genres.count-1{
-                genre.text! += "\(model.genres[i].name), "
-            }
-            genre.text! += "\(model.genres[model.genres.count-1].name)"
-        }
-        //check the url and get image
-        if let imgUrl = model.background_image{
-            let url = URL(string: imgUrl)!
-            self.imageOfGame.downloadImage(from: url)
+            var str = ""
+            var strArr: [String] = []
             
-            let text = NSMutableAttributedString()
-            text.append(NSAttributedString(string: "metacritic: ", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black]));
-            text.append(NSAttributedString(string: "\(model.metacritic ?? 0)", attributes: [NSAttributedString.Key.foregroundColor: Helper.shared.hexStringToUIColor(hex: "#D80000", alpha: 1.0), NSAttributedString.Key.font: UIFont(name: "Avenir-Roman", size: 18.0)!] ))
-            self.metaCritic.attributedText = text
+            strArr = model.genres.compactMap({ $0.name })
+            str = strArr.joined(separator: ", ")
+            
+            genre.text = str
         }
+        
+        
+        //check the url and get image
+        if let imgUrl = model.background_image,
+           let url = URL(string: imgUrl) {
+            
+            let transition = SDWebImageTransition.fade
+            transition.prepares = { (view, image, imageData, cacheType, imageURL) in
+                view.transform = .init(rotationAngle: .pi)
+            }
+            transition.animations = { (view, image) in
+                view.transform = .identity
+            }
+            self.imageOfGame.sd_imageTransition = transition
+            
+            self.imageOfGame.sd_setImage(with: url)
+        }
+        guard let font = UIFont(name: "Avenir-Roman", size: 18.0) else{
+            self.metaCritic.text = "metacritic: \(model.metacritic ?? 0)"
+            return
+        }
+        let text = NSMutableAttributedString()
+        text.append(NSAttributedString(string: "metacritic: ", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black]));
+        text.append(NSAttributedString(string: "\(model.metacritic ?? 0)", attributes: [NSAttributedString.Key.foregroundColor: UIColor(hex: "D80000", alpha: 1.0), NSAttributedString.Key.font: font] ))
+        self.metaCritic.attributedText = text
+        
     }
     
     

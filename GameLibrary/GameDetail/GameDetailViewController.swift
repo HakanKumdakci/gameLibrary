@@ -12,18 +12,18 @@ import TinyConstraints
 class GameDetailViewController: UIViewController {
     
     var viewModel: GameDetailViewModel!
-    var expandedDetail = false
+    private var expandedDetail = false
     
-    let imageOfGame: UIImageView = {
+    private let imageOfGame: UIImageView = {
         let imageView = UIImageView(frame: .zero)
         imageView.layer.cornerRadius = 0
         imageView.backgroundColor = .white
         imageView.layer.masksToBounds = true
-        imageView.contentMode = .center
+        imageView.contentMode = .scaleToFill
         return imageView
     }()
     
-    var nameOfGame: UILabel = {
+    private var nameOfGame: UILabel = {
         let label = UILabel(frame: .zero)
         label.font = UIFont(name: "Avenir-Heavy", size: 28)
         label.textColor = .white
@@ -32,7 +32,7 @@ class GameDetailViewController: UIViewController {
         return label
     }()
     
-    var titleOfDescription: UILabel = {
+    private var titleOfDescription: UILabel = {
         let label = UILabel(frame: .zero)
         label.font = UIFont(name: "Avenir-Roman", size: 20)
         label.textColor = .black
@@ -42,7 +42,7 @@ class GameDetailViewController: UIViewController {
         return label
     }()
     
-    var detailOfGame: UITextView = {
+    private var detailOfGame: UITextView = {
         var textView = UITextView(frame: .zero)
         textView.isScrollEnabled = false
         textView.isSelectable = false
@@ -53,7 +53,7 @@ class GameDetailViewController: UIViewController {
         return textView
     }()
     
-    lazy var redditButton: UIButton = {
+    private lazy var redditButton: UIButton = {
         var btn = UIButton(type: .system)
         btn.setTitle("", for: .normal)
         btn.titleLabel?.textAlignment = .left
@@ -65,7 +65,7 @@ class GameDetailViewController: UIViewController {
         return btn
     }()
     
-    lazy var websitebutton: UIButton = {
+    private lazy var websitebutton: UIButton = {
         var btn = UIButton(type: .system)
         btn.setTitle("", for: .normal)
         btn.titleLabel?.textAlignment = .left
@@ -77,7 +77,7 @@ class GameDetailViewController: UIViewController {
         return btn
     }()
     
-    lazy var detailTableView: UITableView! = {
+    private lazy var detailTableView: UITableView! = {
         var table = UITableView(frame: .zero)
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         table.delegate = self
@@ -89,11 +89,14 @@ class GameDetailViewController: UIViewController {
         viewModel.fetchData()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationItem.largeTitleDisplayMode = .never
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .white
-        viewModel.delegate = self
         
         if let favGames = UserDefaults.standard.value(forKey: "fav") as? [String]{
             if favGames.contains(where: { $0 == "\(viewModel.game.id)"} ) {
@@ -160,21 +163,22 @@ class GameDetailViewController: UIViewController {
         
     }
     
-    @objc func openSafari(sender: UIButton){
-        var url = URL(string: "\(self.viewModel.gameDetail.reddit_url ?? "")")!
-        if sender.tag == 2{
-            url = URL(string: "\(self.viewModel.gameDetail.website ?? "")")!
-        }
+    @objc private func openSafari(sender: UIButton){
+        guard var url = URL(string: "\(self.viewModel.gameDetail.reddit_url ?? "")") else {return }
         
+        if sender.tag == 2{
+            guard let url2 = URL(string: "\(self.viewModel.gameDetail.website ?? "")") else {return }
+            url = url2
+        }
         let vc = SFSafariViewController(url: url)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.present(vc, animated: true, completion: nil)
         }
     }
     
-    @objc func toggleFavorite(){
-        if var favGames = UserDefaults.standard.value(forKey: "fav") as? [String]{
-            if let index = favGames.firstIndex(of: "\(viewModel.game.id)"){
+    @objc private func toggleFavorite() {
+        if var favGames = UserDefaults.standard.value(forKey: "fav") as? [String] {
+            if let index = favGames.firstIndex(of: "\(viewModel.game.id)") {
                 favGames.remove(at: index)
                 UserDefaults.standard.set(favGames, forKey: "fav")
                 self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(title: "Favorite", style: .done, target: self, action: #selector(self.toggleFavorite))
@@ -188,14 +192,14 @@ class GameDetailViewController: UIViewController {
     
 }
 
-extension GameDetailViewController: UITableViewDelegate, UITableViewDataSource{
+extension GameDetailViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        if indexPath.row == 0{
+        if indexPath.row == 0 {
             cell.addSubview(titleOfDescription)
             cell.addSubview(detailOfGame)
 
@@ -209,14 +213,14 @@ extension GameDetailViewController: UITableViewDelegate, UITableViewDataSource{
             detailOfGame.trailing(to: titleOfDescription)
             detailOfGame.bottomToSuperview()
             
-        }else if indexPath.row == 1{
+        }else if indexPath.row == 1 {
             cell.addSubview(redditButton)
             
             redditButton.topToSuperview()
             redditButton.leadingToSuperview(offset: 32)
             redditButton.width(128)
             redditButton.bottomToSuperview()
-        }else if indexPath.row == 2{
+        }else if indexPath.row == 2 {
             cell.addSubview(websitebutton)
             
             websitebutton.topToSuperview()
@@ -233,22 +237,16 @@ extension GameDetailViewController: UITableViewDelegate, UITableViewDataSource{
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if indexPath.row == 0{
-            return expandedDetail ? self.view.frame.height/1.6 : self.view.frame.height/6
-        }else if indexPath.row == 1{
-            return 48
-        }else{
-            return 48
-        }
+        return indexPath.row == 0 ? (expandedDetail ? self.view.frame.height/1.6 : self.view.frame.height/6) : 48
     }
-    
     
 }
 
 
 extension GameDetailViewController: GameDetailViewModelDelegate{
     func didFetchCompleted() {
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {return }
             self.navigationItem.rightBarButtonItem?.isEnabled = true
             self.websitebutton.isEnabled = true
             self.redditButton.isEnabled = true
@@ -257,13 +255,13 @@ extension GameDetailViewController: GameDetailViewModelDelegate{
             self.redditButton.setTitle("Visit reddit", for: .normal)
             self.websitebutton.setTitle("Visit website", for: .normal)
             
-            let url = URL(string: "\(self.viewModel.gameDetail.background_image)")!
-            self.imageOfGame.downloadImage(from: url)
-            self.imageOfGame.backgroundColor = Helper.shared.hexStringToUIColor(hex: "000000", alpha: 0.8)
-            
             self.detailOfGame.text = self.viewModel.gameDetail.description
             self.nameOfGame.text = self.viewModel.gameDetail.name
             self.detailTableView.reloadData()
+            
+            self.imageOfGame.backgroundColor = UIColor(hex: "000000", alpha: 0.8)
+            guard let url = URL(string: "\(self.viewModel.gameDetail.background_image)") else {return }
+            self.imageOfGame.sd_setImage(with: url, placeholderImage: nil, options: [.progressiveLoad])
             
         }
     }

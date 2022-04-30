@@ -30,7 +30,8 @@ class GameLibraryTests: XCTestCase {
 
     func testExample() throws {
         
-        viewModel.fetchData()
+        viewModel.fetchData { _ in
+        }
         XCTAssertEqual(viewModel.gameApi?.results.count, 10)
         
         }

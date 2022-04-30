@@ -57,7 +57,6 @@ class GameCollectionViewCell: UICollectionViewCell {
         contentView.addSubview(nameOfGame)
         contentView.addSubview(metaCritic)
         contentView.addSubview(genre)
-        
     }
     
     required init?(coder: NSCoder) {
@@ -91,35 +90,39 @@ class GameCollectionViewCell: UICollectionViewCell {
         metaCritic.height(18)
         
         self.layer.cornerRadius = 4
-        self.imageOfGame.backgroundColor = Helper.shared.hexStringToUIColor(hex: "000000", alpha: 0.8)
-        
+        self.imageOfGame.backgroundColor = UIColor(hex: "000000", alpha: 0.8)
     }
     
     
-    public func configure(with model: Game){
+    public func configure(with model: Game) {
         self.model = model
         nameOfGame.text = model.name
         
         // check genres and place them to string
         if model.genres.count > 0{
-            genre.text = ""
-            for i in 0..<model.genres.count-1{
-                genre.text! += "\(model.genres[i].name), "
-            }
-            genre.text! += "\(model.genres[model.genres.count-1].name)"
+            var str = ""
+            var strArr: [String] = []
+            
+            strArr = model.genres.compactMap({ $0.name })
+            str = strArr.joined(separator: ", ")
+            
+            genre.text = str
         }
         //check the url and get image
-        if let imgUrl = model.background_image{
+        if let imgUrl = model.background_image,
+           let url = URL(string: imgUrl) {
             if imgUrl != ""{
-                let url = URL(string: imgUrl)!
-                //self.imageOfGame.downloadImage(from: url)
-                self.imageOfGame.sd_setImage(with: url)
+                self.imageOfGame.sd_setImage(with: url, placeholderImage: nil, options: [.progressiveLoad])
             }
             
             let text = NSMutableAttributedString()
             text.append(NSAttributedString(string: "metacritic: ", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black]));
-            text.append(NSAttributedString(string: "\(model.metacritic ?? 0)", attributes: [NSAttributedString.Key.foregroundColor: Helper.shared.hexStringToUIColor(hex: "#D80000", alpha: 1.0), NSAttributedString.Key.font: UIFont(name: "Avenir-Roman", size: 18.0)!] ))
+            text.append(NSAttributedString(string: "\(model.metacritic ?? 0)", attributes: [NSAttributedString.Key.foregroundColor: UIColor(hex: "D80000", alpha: 1.0), NSAttributedString.Key.font: UIFont(name: "Avenir-Roman", size: 18.0)!] ))
             self.metaCritic.attributedText = text
+        }
+        
+        if let tapped = UserDefaults.standard.array(forKey: "tapped") as? [String] {
+            self.backgroundColor = tapped.contains("\(model.id)") ? UIColor(hex: "E0E0E0", alpha: 1.0) : .white
         }
         
         

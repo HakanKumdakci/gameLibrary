@@ -12,24 +12,34 @@ protocol RealmServiceProtocol: AnyObject{
 class RealmService: RealmServiceProtocol{
     
     static let shared = RealmService()
-    var realm: Realm!
+    var realm: Realm?
     
     init(realm: Realm){
         self.realm = realm
     }
     
-    convenience init(test: Bool = false){
+    convenience init(test: Bool = false) {
         if test{
             let x = Realm.Configuration(inMemoryIdentifier: "GameLibraryTest")
-            self.init(realm: try! Realm(configuration: x))
-        }else{
-            self.init(realm: try! Realm())
+            do {
+                self.init(realm: try Realm(configuration: x))
+            }catch {
+                self.init()
+            }
+        }
+        
+        do{
+            self.init(realm: try Realm())
+        }catch{
+            self.init()
         }
         
     }
     
     
-    func create<T: Object>(_ object: T){
+    func create<T: Object>(_ object: T) {
+        guard let realm = realm else {return }
+
         do{
             try realm.write{
                 realm.add(object)
@@ -39,18 +49,21 @@ class RealmService: RealmServiceProtocol{
         }
     }
     
-    func delete<T: Object>(_ object: T){
+    func delete<T: Object>(_ object: T) {
+        guard let realm = realm else {return }
         do{
             try realm.write{
                 realm.delete(object)
             }
         }catch{
-            
+            print("error")
         }
     }
     
-    func get<T: Object>(_ object: T.Type) -> Results<T>?{
-        return realm.objects(T.self).count == 0 ? nil : realm.objects(T.self)
+    func get<T: Object>(_ object: T.Type) -> Results<T>? {
+        guard let realm = realm else {return nil }
+
+        return realm.objects(T.self).isEmpty ? nil : realm.objects(T.self)
     }
 }
 

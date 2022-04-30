@@ -28,9 +28,9 @@ class GameDetailTest: XCTestCase {
         viewModel.game = Game(id: 3489, name: "", genres: [Genre(name: "")])
         viewModel.fetchData()
         
-        
         XCTAssertEqual(viewModel.gameDetail.id, 3489)
         
     }
+    
     
 }

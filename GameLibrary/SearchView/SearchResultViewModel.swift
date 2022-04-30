@@ -7,6 +7,7 @@
 
 import UIKit
 import RealmSwift
+import Moya
 
 protocol SearchResultViewModelDelegate: AnyObject{
     func didSearchComplete()
@@ -22,6 +23,8 @@ class SearchResultViewModel: NSObject {
     var realmService: RealmServiceProtocol!
     var dispatchQueue: DispatchQueueType!
     
+    var gameProvider = MoyaProvider<MoyaService>()
+    
     init(service: NetworkingServiceProtocol,
          realmService: RealmServiceProtocol = RealmService.shared,
          dispatchQueue: DispatchQueueType = DispatchQueue.main) {
@@ -31,19 +34,26 @@ class SearchResultViewModel: NSObject {
     }
     
     func fetchData(str: String, optionalURL:  String = ""){
-        
-        guard let key = Bundle.main.object(forInfoDictionaryKey: "privateKey") as? String else{ return }
-        guard let gameSearch = Bundle.main.object(forInfoDictionaryKey: "gameSearch") as? String else{ return }
-        
+                
         self.searchText = str
-        let url = (optionalURL == "") ? "\(gameSearch)\(str.stripped)&key=\(key)" : optionalURL
-        service.getData(GameApi.self, url: url) { [weak self] result in
-            guard let strongSelf = self else {return }
-            strongSelf.searchedGameApi = result
-            strongSelf.delegate?.didSearchComplete()
-            strongSelf.dispatchQueue.async {
-                strongSelf.cleanRealm()
-                strongSelf.saveToRealm()
+        
+        gameProvider.request(.getSearch(keyword: str.stripped)) { [weak self] result in
+            switch result{
+                case .success(let response):
+                    guard let strongSelf = self else {return }
+                    do{
+                        let object = try JSONDecoder().decode(GameApi.self, from: response.data)
+                        strongSelf.searchedGameApi = object
+                        strongSelf.delegate!.didSearchComplete()
+                        strongSelf.dispatchQueue.async {
+                            strongSelf.cleanRealm()
+                            strongSelf.saveToRealm()
+                        }
+                    }catch{
+                        print("error")
+                    }
+                case .failure(let error):
+                    print(error)
             }
         }
     }
@@ -52,28 +62,30 @@ class SearchResultViewModel: NSObject {
     func saveToRealm(){
         for i in 0..<(searchedGameApi?.results.count ?? 0){
             guard let obj = searchedGameApi?.results[i] else{ return }
-            
-            let jsonData = try! obj.jsonData()
-            // To get dictionary from `Data`
-            let json = try! JSONSerialization.jsonObject(with: jsonData, options: [])
-            guard var dictionary = json as? [String : Any] else {
-                return
+            do{
+                let jsonData = try obj.jsonData()
+                // To get dictionary from `Data`
+                let json = try JSONSerialization.jsonObject(with: jsonData, options: [])
+                guard var dictionary = json as? [String : Any] else {
+                    return
+                }
+                //index is used to sort games
+                dictionary["index"] = i
+                dictionary["key"] = searchText
+                dictionary["genres"] = obj.genres.map{ $0.name }
+                
+                realmService.create(GameRealm(value: dictionary))
+            }catch{
+                print("Function: \(#function), line: \(#line)")
             }
-            //index is used to sort games
-            dictionary["index"] = i
-            dictionary["key"] = searchText
-            dictionary["genres"] = obj.genres.map{ $0.name }
             
-            realmService.create(GameRealm(value: dictionary))
         }
         UserDefaults.standard.set(searchText, forKey: "key")
     }
     
     func cleanRealm(){
         guard let objects = realmService.get(GameRealm.self) else{return }
-        for i in objects{
-            realmService.delete(i)
-        }
+        objects.forEach( {realmService.delete($0) })
     }
     
     // önceden kaydedilmiş oyunları çekiyor

@@ -65,8 +65,6 @@ class SearchResultViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel = SearchResultViewModel(service: NetworkingService.shared)
-        viewModel.delegate = self
         
         view.addSubview(gameCollectionView)
         view.addSubview(errorLabel)
@@ -74,7 +72,6 @@ class SearchResultViewController: UIViewController {
         gameCollectionView.isHidden = true
         
         NotificationCenter.default.addObserver(self, selector: #selector(self.rotated), name: UIDevice.orientationDidChangeNotification, object: nil)
-        // Do any additional setup after loading the view.
     }
     
     deinit {
@@ -108,14 +105,14 @@ class SearchResultViewController: UIViewController {
         }
     }
     
-    
-    
 }
 
 extension SearchResultViewController: SearchResultViewModelDelegate{
     func didSearchComplete() {
+        guard let result = self.viewModel.searchedGameApi?.results else{return }
+        
         DispatchQueue.main.async {
-            if self.viewModel?.searchedGameApi?.results.count == 0{
+            if result.isEmpty{
                 self.errorLabel.isHidden = false
                 self.gameCollectionView.isHidden = true
                 self.errorLabel.text = "Could not found any game according to your search."
@@ -139,10 +136,9 @@ extension SearchResultViewController: UICollectionViewDelegateFlowLayout, UIColl
         }
         
         let vc = GameDetailViewController()
-        vc.viewModel = GameDetailViewModel(service: NetworkingService.shared)
+        vc.viewModel = GameDetailViewModel(service: NetworkingService())
         vc.viewModel.game = viewModel?.searchedGameApi?.results[indexPath.row]
         self.delegate?.openDetail(vc: vc)
-        
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -163,7 +159,9 @@ extension SearchResultViewController: UICollectionViewDelegateFlowLayout, UIColl
             return cell
         }
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "GameCollectionViewCell", for: indexPath) as! GameCollectionViewCell
-        cell.configure(with: (viewModel?.searchedGameApi?.results[indexPath.row])!)
+        
+        guard let model = (viewModel?.searchedGameApi?.results[indexPath.row]) else{return cell}
+        cell.configure(with: model)
         return cell
     }
     
