@@ -17,10 +17,11 @@ class GamesViewController: UIViewController, UISearchControllerDelegate, UISearc
         
         if let searchKey = UserDefaults.standard.string(forKey: "key") {
             if searchKey == text{
-                searchResultViewModel?.fetchFromRealm()
+                searchResultViewModel?.fetchFromRealm(str: text)
                 errorLabel.isHidden = true
                 return
             }
+            
         }
         if text.count <= 3{
             UserDefaults.standard.set(nil, forKey: "key")
@@ -42,6 +43,8 @@ class GamesViewController: UIViewController, UISearchControllerDelegate, UISearc
                 }else{
                     
                 }
+            }else{
+                
             }
         }
         //first search screen

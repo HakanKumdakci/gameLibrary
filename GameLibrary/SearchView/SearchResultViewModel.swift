@@ -28,6 +28,8 @@ class SearchResultViewModel: NSObject {
          dispatchQueue: DispatchQueueType = DispatchQueue.main) {
         self.realmService = realmService
         self.dispatchQueue = dispatchQueue
+        
+        print(Realm.Configuration.defaultConfiguration.fileURL!)
     }
     
     func fetchData(str: String, optionalURL:  String = "") {
@@ -86,10 +88,10 @@ class SearchResultViewModel: NSObject {
     }
     
     // önceden kaydedilmiş oyunları çekiyor
-    func fetchFromRealm() {
+    func fetchFromRealm(str: String) {
         guard let objects = realmService?.get(GameRealm.self) else{return }
         var games: [Game] = []
-        let sameKey = objects.filter("key = '\(searchText)'")
+        let sameKey = objects.filter("key = '\(str)'")
         
         for i in 0..<10{
             guard let realmObj = sameKey.first(where: { $0.index == i }) else{return }

@@ -60,7 +60,7 @@ class SearchResultTest: XCTestCase {
         viewModel.fetchData(str: "str")
         viewModel.searchedGameApi = nil
         
-        viewModel.fetchFromRealm()
+        viewModel.fetchFromRealm(str: "str")
         
         let objects = viewModel.realmService?.get(GameRealm.self)
         
